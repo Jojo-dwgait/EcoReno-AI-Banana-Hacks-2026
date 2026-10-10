@@ -42,7 +42,7 @@ export function PhotoInput({ photo, onPhoto, extraAction, caption }: Props) {
           className="flex min-h-48 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed border-line bg-surface p-6 text-center"
         >
           <span className="font-medium">Add a photo of a house exterior</span>
-          <span className="text-sm text-muted">Front view with the yard, roof, and windows visible works best. Take one or choose from your library.</span>
+          <span className="text-sm text-muted">A front view with the yard, roof, and windows visible works best. JPEG or PNG.</span>
         </label>
       )}
       <div className="flex flex-wrap items-center gap-3">

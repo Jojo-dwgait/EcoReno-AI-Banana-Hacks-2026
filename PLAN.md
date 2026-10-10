@@ -39,7 +39,7 @@ Banana Hacks 2026, solo. Plan v4, written Sat Oct 10 2026, ~12:45 AM PDT; it sup
 | 3 | **Evidence-traced** | Every visible change links to a computed number or a cited source. No LLM ever writes a number | B, D |
 | 4 | **Data, not stereotypes** | Adaptation comes from the site profile's numbers, never from a city's name | B |
 | 5 | **Honest claims** | Estimates are labeled. No savings, permit or parcel-hazard claims, and never "will increase value" | D |
-| 6 | **Open to anyone** | Any U.S. city, phone camera, no login, plain language, accessible | D, E |
+| 6 | **Open to anyone** | Any U.S. city, no login, plain language, accessible web app | D, E |
 
 ### What a judge should remember
 1. "It edited the **same house** differently for two climates, and showed exactly why."
@@ -72,7 +72,7 @@ Banana Hacks 2026, solo. Plan v4, written Sat Oct 10 2026, ~12:45 AM PDT; it sup
 ## 3. User experience
 
 ### 3.1 Screens
-1. **Start:** upload, take a photo (mobile camera), or "Try a sample house". One-line privacy note.
+1. **Start:** upload a photo or "Try a sample house". One-line privacy note.
 2. **Location:** city search → U.S.-only results with state and county → explicit pick (Portland, OR vs Portland, ME). Priority: **Balanced** (default) · Save water · Stay cool · Manage rain. Renter-friendly toggle (P2).
 3. **Review:** climate evidence panel (2016–2025, units, source, coverage) with site-profile badges (climate type, aridity, plant zone, heating vs cooling). Detected features appear as editable chips with confidence. Photos that aren't a house exterior are rejected politely.
 4. **Choose:** ranked cards (score breakdown, evidence chain, where in the photo). Top picks are preselected; the user keeps 1–3.
@@ -93,13 +93,13 @@ Banana Hacks 2026, solo. Plan v4, written Sat Oct 10 2026, ~12:45 AM PDT; it sup
 - **Avoid:** purple gradients, glow, emoji icons, the centered hero with three feature cards, and the cream-serif-sage "tasteful default".
 - **Components:** `PhotoInput`, `CityPicker`, `PriorityPicker`, `ClimateEvidence`, `ProfileBadges`, `FeatureChips`, `RecommendationCard`, `PipelineStepper`, `BeforeAfterSlider`, `Pin`, `ChangeCard`, `FidelityReport`, `ChangeMap`, `ValuePanel`, `CompareView`.
 
-### 3.3 Accessibility and mobile (checked in M5 and M8)
+### 3.3 Accessibility (checked in M5 and M8)
+Scope (decided Oct 10): **desktop web app only**. No mobile-specific features or phone testing; the existing responsive Tailwind layout stays as-is but isn't a QA target.
 - WCAG AA contrast in both themes.
 - Slider works with arrow keys and exposes `aria-valuenow`.
 - Visible focus on every control; labels on every input.
 - Alt text for the edited image comes from the reviewer's description.
 - Reduced motion is respected.
-- Layout works at 375 px wide, the camera input works on iOS and Android, and touch targets are ≥ 44 px.
 
 ---
 
@@ -329,7 +329,7 @@ Each milestone ends with tests passing and a commit. Times are PDT.
 ### Sunday Oct 11
 | Time | Milestone | Tasks | Done when | Rubric |
 |---|---|---|---|---|
-| 7:30–10:30 | **M5 Judge path + polish** | Pre-generate sample results (Irvine + contrast city); "Try a sample house" from cache; `CompareView` (same photo, 2–3 cities, plus a shareable comparison image); error states for every code; mobile layout; a11y pass; watermarked concept-sheet download; next-step links | Fresh browser: sample result < 3 s; compare works live; usable on a phone | B, E, D |
+| 7:30–10:30 | **M5 Judge path + polish** | Pre-generate sample results (Irvine + contrast city); "Try a sample house" from cache; `CompareView` (same photo, 2–3 cities, plus a shareable comparison image); error states for every code; a11y pass; watermarked concept-sheet download; next-step links | Fresh browser: sample result < 3 s; compare works live | B, E, D |
 | 10:30–1:00 | **M6 Value panel** | Verify cited studies → `premiums.json`; RentCast client with fixtures; regression; `ValuePanel` (current → with upgrades, itemized, caveats) | Value panel renders for the demo cities with sources; graceful fallback at the cap | D |
 | 1:00–1:30 | Lunch + **CP4** | | | |
 | 1:30–3:00 | **M7 Stretch** | Renter mode → FEMA National Risk Index → (2050 only if well ahead) | Each shipped stretch item is tested and labeled | B, D |
@@ -369,7 +369,7 @@ Each milestone ends with tests passing and a commit. Times are PDT.
 - **Smoke (`npm run smoke`, live APIs):** the acceptance cities, plus a no-match string and a forced provider failure.
 - **Fidelity eval:** 5 photos × 2 plans through the full pipeline → % of changes visible, % pixel change outside targets, retries, and latency, published in the README.
 - **Manual QA checklist (M5, M8):**
-  - Fresh incognito browser and a phone; light and dark mode; keyboard-only run.
+  - Fresh incognito desktop browser (Chrome + Safari); light and dark mode; keyboard-only run.
   - Slow network; a non-house photo; a HEIC upload.
   - Rate limit reached; quota reached; RentCast cap reached.
 - **Before each commit:** `tsc --noEmit`, lint, tests.
@@ -402,7 +402,7 @@ Each milestone ends with tests passing and a commit. Times are PDT.
   - Setup (env vars, scripts) · tests · limitations · AI-assistance disclosure (built with Claude Code) · license.
 
 ## 13. Submission checklist
-- [ ] Live URL works from a fresh incognito browser and a phone (sample path + one live run)
+- [ ] Live URL works from a fresh incognito desktop browser (sample path + one live run)
 - [ ] Repo public; history shows commits inside the event window; secret scan clean; no photos of private homes
 - [ ] Video ≤ 3:00, unlisted link works logged-out
 - [ ] Write-up ≤ 500 words (counted)
@@ -438,6 +438,7 @@ Each milestone ends with tests passing and a commit. Times are PDT.
 | Demo photo | Free-licensed real photo; your own house only for private tests |
 | Live link | Open with limits; cached sample house |
 | Look | Photo-first markup + field-report change log |
+| Platform (Oct 10) | Desktop web app only; no mobile-specific work |
 
 ## 16. Inputs and accounts (yours)
 | When | Item |
