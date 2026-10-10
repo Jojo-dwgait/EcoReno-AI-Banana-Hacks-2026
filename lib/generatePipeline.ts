@@ -9,6 +9,11 @@ import { reviewEdit } from "./visionClient";
 
 export type AttemptLog = { attempt: number; editMs: number; reviewMs: number | null; model: string; verdict: Verdict; aspectMismatch: number };
 
+export type StageEvent =
+  | { stage: "edit"; attempt: number }
+  | { stage: "review"; attempt: number }
+  | { stage: "retry"; reason: string };
+
 export type GenerationResult = {
   image: ImageInput;
   review: ReviewResult | null;
@@ -30,13 +35,19 @@ export function strictPlan(plan: EditPlan, review: ReviewResult): EditPlan {
   };
 }
 
-export async function runGeneration(editor: ImageEditor, original: ImageInput, plan: EditPlan): Promise<GenerationResult> {
+export async function runGeneration(
+  editor: ImageEditor,
+  original: ImageInput,
+  plan: EditPlan,
+  onStage: (e: StageEvent) => void = () => {},
+): Promise<GenerationResult> {
   const attempts: AttemptLog[] = [];
   let best: GenerationResult | null = null;
   let currentPlan = plan;
 
   for (let attempt = 1; attempt <= 2; attempt++) {
     const prompt = buildEditPrompt(currentPlan);
+    onStage({ stage: "edit", attempt });
     const edit = await editor.edit(original, prompt);
     const norm = await normalizeToOriginal(edit.base64, original.width, original.height);
     const edited: ImageInput = { mimeType: norm.mimeType, base64: norm.base64, width: norm.width, height: norm.height };
@@ -44,6 +55,7 @@ export async function runGeneration(editor: ImageEditor, original: ImageInput, p
     let review: ReviewResult | null = null;
     let reviewMs: number | null = null;
     let reviewModel: string | null = null;
+    onStage({ stage: "review", attempt });
     try {
       const r = await reviewEdit(original, edited, plan);
       review = r.review;
@@ -59,6 +71,8 @@ export async function runGeneration(editor: ImageEditor, original: ImageInput, p
     const candidate: GenerationResult = { image: edited, review, verdict, attempts, prompt, editModel: edit.model, reviewModel };
     if (!best || (review && (!best.review || reviewScore(review) > reviewScore(best.review)))) best = candidate;
     if (verdict !== "retry" || !review) break;
+    const missing = review.perChange.filter((c) => c.status === "missing").length;
+    onStage({ stage: "retry", reason: missing > 0 ? `${missing} change${missing > 1 ? "s" : ""} not visible yet` : "parts of the original drifted" });
     currentPlan = strictPlan(plan, review);
   }
   if (!best) throw new AppError("EDIT_FAILED", "The image AI didn't return an edited image. Please try again.", 502);
