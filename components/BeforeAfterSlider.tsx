@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 type Props = {
   before: string;
@@ -8,16 +8,21 @@ type Props = {
   width: number;
   height: number;
   afterAlt: string;
+  /** Non-interactive layer drawn over the concept image (e.g. the change map). */
+  underlay?: ReactNode;
+  /** Interactive layer above the drag surface (e.g. numbered pins). */
+  pins?: ReactNode;
 };
 
 /** Same-photo comparison. A full-size native range input handles drag, touch, and arrow keys. */
-export function BeforeAfterSlider({ before, after, width, height, afterAlt }: Props) {
+export function BeforeAfterSlider({ before, after, width, height, afterAlt, underlay, pins }: Props) {
   const [pos, setPos] = useState(50);
   return (
     <figure className="space-y-2">
       <div className="relative overflow-hidden rounded-md border border-line" style={{ aspectRatio: `${width} / ${height}` }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- data URLs */}
         <img src={after} alt={afterAlt} className="absolute inset-0 h-full w-full object-cover" />
+        {underlay && <div className="pointer-events-none absolute inset-0">{underlay}</div>}
         {/* eslint-disable-next-line @next/next/no-img-element -- data URLs */}
         <img
           src={before}
@@ -38,10 +43,11 @@ export function BeforeAfterSlider({ before, after, width, height, afterAlt }: Pr
           onChange={(e) => setPos(Number(e.target.value))}
           aria-label="Compare original and concept"
           aria-valuetext={`${pos}% original shown`}
-          className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
+          className="absolute inset-0 z-10 h-full w-full cursor-ew-resize opacity-0"
         />
+        {pins && <div className="pointer-events-none absolute inset-0 z-20">{pins}</div>}
       </div>
-      <figcaption className="text-xs text-muted">Drag or use arrow keys. AI concept image, not the actual property.</figcaption>
+      <figcaption className="text-xs text-muted">Drag or use arrow keys to compare. AI concept image, not the actual property.</figcaption>
     </figure>
   );
 }

@@ -2,35 +2,42 @@
 
 Execution log for PLAN.md (v4). Newest status first.
 
-## Status: Sat Oct 10, ~11:00 AM PDT
-Started at 10:45 AM instead of 8:30 AM (about 2¼ h behind PLAN.md §8). Recovery plan:
-1. Build all keyless work first (Open-Meteo needs no key): setup, geocode, climate, site profile, tests, upload + slider UI.
-2. The Gemini spike + generate route follow as soon as the key is in `.env.local` (expected ~11:45 AM). **CP1 moves to ~1:00 PM.**
-3. Absorb the remaining delay from M5 polish time and the cut order in PLAN.md §8 (2050 mode is already expected to be cut).
+## Status: Sat Oct 10, ~11:15 AM PDT
+Started 10:45 AM (about 2¼ h behind plan). Everything that doesn't need the Gemini key is built and tested. **Blocked on the key** for the first real edit (CP1).
 
 ## Done
-- [x] Next.js 16.4 + TypeScript strict + Tailwind 4 + ESLint + Vitest + zod + tsx; git initialized (`main`)
-- [x] `.gitignore` excludes env files, photos, PDFs, zip
-- [x] `lib/http.ts`: timeout + exponential backoff on 429/5xx/network; 4xx not retried
-- [x] `lib/geocode.ts` + `GET /api/geocode`: U.S.-only (50 states + DC), "City, ST" parsing, dedupe, exact-name ranking, no auto-pick
-- [x] `lib/openMeteo.ts`: 2016–2025 archive, 8 daily variables, unit verification, land-cell selection, cache key on coordinates + window + variables + settings
-- [x] `lib/climateMetrics.ts`: 15 metrics with coverage/quality; missing days never imputed
-- [x] `lib/siteProfile.ts`: Köppen (Peel 2007), UNEP aridity, approximate hardiness zone, thermal dominance, bands
-- [x] `POST /api/climate`: validated input, cached, structured logs
-- [x] 49 unit tests passing; `tsc --noEmit` clean
+- [x] Scaffold: Next.js 16.4, TS strict, Tailwind 4, Vitest, zod, tsx, git (`main`), repo email = GitHub noreply
+- [x] Nationwide geocoding (U.S.-only, explicit pick, CT planning regions, county labels)
+- [x] Climate: 2016–2025 Open-Meteo archive, 15 metrics with coverage, unit checks, retry/backoff, cache
+- [x] Site profile: Köppen, aridity, approximate hardiness zone, thermal dominance, bands
+- [x] 9 real-city fixtures recorded; engine and profile tested on real data
+- [x] Recommendation engine: 9 interventions, gates, disclosed weights, Balanced selection, regional style table
+- [x] Edit plan + prompt (no numbers or place names), scene text sanitized
+- [x] Gemini adapter (edit + vision analysis + review), output normalization to original pixels
+- [x] Generate pipeline: edit → review → ≤1 strict retry → keep better; streamed NDJSON stages
+- [x] Model-free pixel change map (browser) with drift outside target areas
+- [x] Rate limits (per visitor + global daily)
+- [x] UI: photo upload, city picker, climate evidence, feature chips, recommendation cards with score breakdown, stepper, result with pins + change log + fidelity report + watermarked download + prompt transparency
+- [x] 111 tests passing; typecheck + lint clean
 
-## In progress
-- [ ] Fixture recording for 9 acceptance cities (`npm run fixtures`)
-- [ ] Upload (resize + EXIF strip), city picker, climate panel, slider UI
+## Blocked / waiting on you
+- [ ] `GEMINI_API_KEY` in `.env.local` → run spike: `npx tsx --conditions=react-server scripts/spike-edit.mts photos/<file>.jpg --list-models`
+- [ ] Approve demo photo download (candidates: Unsplash 81ckTA9FXEE [preferred], L8SsHskRWIE, Ny6ZtbducqU)
 
 ## Next
-- [ ] Gemini key → `scripts/spike-edit.ts` → `/api/generate` (CP1)
-- [ ] Photo candidates (free-licensed) for approval
+- [ ] CP1: real edit on the demo photo; check output size/aspect, one-call vs chained, fidelity
+- [ ] Tune prompts on real outputs; contrast run Irvine vs Minneapolis
+- [ ] Sample-house path from cache; compare-cities view
+- [ ] Deploy (Vercel) + Upstash rate limit/cache
 
 ## Verified commands
-- `npm test` → 49 passed
-- `npm run typecheck` → clean
+- `npm test` → 111 passed · `npm run typecheck` → clean · `npx eslint .` → clean
+- `npx tsx scripts/profile-report.ts` · `npx tsx scripts/engine-report.ts [priority]`
 
 ## Decisions made during build
-- Climate cache: own `KeyValueCache` (memory now, Upstash at deploy). Next's `use cache` doesn't persist on serverless and resets per deploy.
+- Climate cache: own `KeyValueCache` (memory now, Upstash at deploy); Next's `use cache` doesn't persist on serverless.
 - Thermal dominance: cooling if CDD ≥ HDD; heating if HDD ≥ 2×CDD; else mixed.
+- Heat relevance = max(hot-day ramp, CDD ramp): gridded data under-counts coastal hot days (Miami: 14/yr vs CDD 4,388).
+- Hardiness zone from reanalysis runs warm where cold snaps are sharp (Anchorage 6a vs USDA ~4b–5a) → labeled "approximate; may be colder".
+- Engine runs client-side (pure, instant); the server recomputes the profile for generation instead of trusting the client.
+- Contrast city from data: Minneapolis (most different on every axis); Phoenix as a third.

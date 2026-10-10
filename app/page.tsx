@@ -1,18 +1,28 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CityPicker } from "@/components/CityPicker";
 import { ClimateEvidence } from "@/components/ClimateEvidence";
+import { FeatureChips } from "@/components/FeatureChips";
 import { PhotoInput } from "@/components/PhotoInput";
+import { PipelineStepper } from "@/components/PipelineStepper";
+import { RecommendationList } from "@/components/RecommendationList";
+import { ResultView } from "@/components/ResultView";
 import type { PreparedPhoto } from "@/lib/clientImage";
+import { MAX_CHANGES } from "@/lib/editPlan";
+import type { FeatureInventory, FeatureKey } from "@/lib/featureInventory";
 import type { UnitSystem } from "@/lib/format";
+import { readGenerateStream, type GenerateResult, type GenerateStage } from "@/lib/generateTypes";
 import type { Place } from "@/lib/geocode";
+import type { InterventionId } from "@/lib/interventions";
+import { recommend, type Priority } from "@/lib/recommendationEngine";
 import type { SiteProfile } from "@/lib/siteProfile";
 
-type ClimateState =
+type Async<T> = { kind: "idle" } | { kind: "loading" } | { kind: "ready"; value: T } | { kind: "error"; message: string };
+type GenState =
   | { kind: "idle" }
-  | { kind: "loading" }
-  | { kind: "ready"; profile: SiteProfile }
+  | { kind: "running"; stages: GenerateStage[]; startedAt: number }
+  | { kind: "done"; result: GenerateResult }
   | { kind: "error"; message: string };
 
 function Step({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
@@ -27,35 +37,106 @@ function Step({ n, title, children }: { n: string; title: string; children: Reac
   );
 }
 
+async function postJson<T>(url: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal });
+  const data = await res.json().catch(() => ({ ok: false, message: "Unexpected response from the server." }));
+  if (!data.ok) throw new Error(data.message ?? "Request failed.");
+  return data as T;
+}
+
 export default function Home() {
   const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
   const [place, setPlace] = useState<Place | null>(null);
-  const [climate, setClimate] = useState<ClimateState>({ kind: "idle" });
+  const [climate, setClimate] = useState<Async<SiteProfile>>({ kind: "idle" });
+  const [analysis, setAnalysis] = useState<Async<FeatureInventory>>({ kind: "idle" });
   const [units, setUnits] = useState<UnitSystem>("us");
+  const [confirmed, setConfirmed] = useState<Partial<Record<FeatureKey, boolean>>>({});
+  const [priority, setPriority] = useState<Priority>("balanced");
+  const [selectedOverride, setSelectedOverride] = useState<InterventionId[] | null>(null);
+  const [gen, setGen] = useState<GenState>({ kind: "idle" });
+  const [elapsed, setElapsed] = useState(0);
+  const climateReq = useRef<AbortController | null>(null);
+  const analysisReq = useRef<AbortController | null>(null);
 
-  const climateRequest = useRef<AbortController | null>(null);
+  const profile = climate.kind === "ready" ? climate.value : null;
+  const inventory = analysis.kind === "ready" ? analysis.value : null;
+
+  const recs = useMemo(
+    () => (profile && inventory ? recommend({ profile, inventory, priority, confirmed }) : null),
+    [profile, inventory, priority, confirmed],
+  );
+  const selected = selectedOverride ?? recs?.filter((r) => r.preselected).map((r) => r.id) ?? [];
+
+  useEffect(() => {
+    if (gen.kind !== "running") return;
+    const t = setInterval(() => setElapsed(Math.round((Date.now() - gen.startedAt) / 1000)), 1000);
+    return () => clearInterval(t);
+  }, [gen]);
+
+  function resetDownstream() {
+    setSelectedOverride(null);
+    setGen({ kind: "idle" });
+  }
+
+  async function choosePhoto(next: PreparedPhoto | null) {
+    analysisReq.current?.abort();
+    setPhoto(next);
+    setConfirmed({});
+    resetDownstream();
+    if (!next) {
+      setAnalysis({ kind: "idle" });
+      return;
+    }
+    const controller = new AbortController();
+    analysisReq.current = controller;
+    setAnalysis({ kind: "loading" });
+    try {
+      const data = await postJson<{ inventory: FeatureInventory }>("/api/analyze-photo", { image: next.dataUrl }, controller.signal);
+      setAnalysis({ kind: "ready", value: data.inventory });
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") setAnalysis({ kind: "error", message: (err as Error).message });
+    }
+  }
 
   async function selectPlace(next: Place | null) {
-    climateRequest.current?.abort();
+    climateReq.current?.abort();
     setPlace(next);
+    resetDownstream();
     if (!next) {
       setClimate({ kind: "idle" });
       return;
     }
     const controller = new AbortController();
-    climateRequest.current = controller;
+    climateReq.current = controller;
     setClimate({ kind: "loading" });
     try {
-      const res = await fetch("/api/climate", {
+      const data = await postJson<{ profile: SiteProfile }>("/api/climate", { place: next }, controller.signal);
+      setClimate({ kind: "ready", value: data.profile });
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") setClimate({ kind: "error", message: (err as Error).message });
+    }
+  }
+
+  function toggle(id: InterventionId) {
+    setSelectedOverride(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id].slice(0, MAX_CHANGES));
+  }
+
+  async function generate() {
+    if (!photo || !place || !inventory || selected.length === 0) return;
+    setElapsed(0);
+    setGen({ kind: "running", stages: [], startedAt: Date.now() });
+    try {
+      const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ place: next }),
-        signal: controller.signal,
+        body: JSON.stringify({ image: photo.dataUrl, place, selected, inventory }),
       });
-      const data = await res.json();
-      setClimate(data.ok ? { kind: "ready", profile: data.profile } : { kind: "error", message: data.message });
+      const result = await readGenerateStream(res, (s) =>
+        setGen((g) => (g.kind === "running" ? { ...g, stages: [...g.stages, s] } : g)),
+      );
+      setGen({ kind: "done", result });
     } catch (err) {
-      if ((err as Error).name !== "AbortError") setClimate({ kind: "error", message: "Couldn't load climate data. Please try again." });
+      setGen({ kind: "error", message: (err as Error).message });
     }
   }
 
@@ -65,13 +146,24 @@ export default function Home() {
         <p className="font-mono text-xs tracking-widest text-muted uppercase">EcoReno AI · concept tool</p>
         <h1 className="text-3xl font-semibold sm:text-4xl">See your house, redesigned for your climate.</h1>
         <p className="max-w-2xl text-muted">
-          Upload a photo of a house, pick any U.S. city, and get climate-appropriate exterior upgrades edited into the same
-          photo, with ten years of local climate evidence behind every change.
+          Upload a photo of a house, pick any U.S. city, and get climate-appropriate exterior upgrades edited into the same photo, with ten years of local
+          climate evidence behind every change.
         </p>
       </header>
 
       <Step n="01" title="Your house">
-        <PhotoInput photo={photo} onPhoto={setPhoto} />
+        <PhotoInput photo={photo} onPhoto={choosePhoto} />
+        {analysis.kind === "loading" && (
+          <p aria-live="polite" className="text-sm text-muted">
+            Checking what&apos;s visible in the photo…
+          </p>
+        )}
+        {analysis.kind === "error" && (
+          <p role="alert" className="text-sm text-danger">
+            {analysis.message}
+          </p>
+        )}
+        {inventory && <FeatureChips inventory={inventory} confirmed={confirmed} onConfirm={(k, v) => { setConfirmed((c) => ({ ...c, [k]: v })); setSelectedOverride(null); }} />}
       </Step>
 
       <Step n="02" title="Location">
@@ -90,16 +182,49 @@ export default function Home() {
               {climate.message}
             </p>
           )}
-          {climate.kind === "ready" && <ClimateEvidence profile={climate.profile} units={units} onUnits={setUnits} />}
+          {profile && <ClimateEvidence profile={profile} units={units} onUnits={setUnits} />}
         </Step>
       )}
 
-      <Step n="04" title="Concept">
-        <p className="text-muted">
-          {photo && climate.kind === "ready"
-            ? "Image editing is being connected. Recommendations and the edited photo appear here."
-            : "Add a photo and choose a city to continue."}
-        </p>
+      {recs && profile && (
+        <Step n="04" title="Recommended upgrades">
+          <RecommendationList
+            recs={recs}
+            profile={profile}
+            units={units}
+            priority={priority}
+            onPriority={(p) => {
+              setPriority(p);
+              setSelectedOverride(null);
+            }}
+            selected={selected}
+            onToggle={toggle}
+            max={MAX_CHANGES}
+          />
+        </Step>
+      )}
+
+      <Step n={recs ? "05" : "04"} title="Concept">
+        {!recs && <p className="text-muted">Add a photo and choose a city to see recommendations.</p>}
+        {recs && gen.kind !== "running" && (
+          <button
+            type="button"
+            onClick={generate}
+            disabled={selected.length === 0}
+            className="min-h-12 rounded-md bg-accent px-6 font-semibold text-accent-ink disabled:opacity-50"
+          >
+            {gen.kind === "done" ? "Generate again" : `Edit my photo with ${selected.length} change${selected.length === 1 ? "" : "s"}`}
+          </button>
+        )}
+        {gen.kind === "running" && <PipelineStepper stages={gen.stages} elapsedSec={elapsed} />}
+        {gen.kind === "error" && (
+          <p role="alert" className="text-danger">
+            {gen.message}
+          </p>
+        )}
+        {gen.kind === "done" && photo && profile && inventory && (
+          <ResultView original={photo.dataUrl} result={gen.result} profile={profile} inventory={inventory} units={units} />
+        )}
       </Step>
     </main>
   );
