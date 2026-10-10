@@ -69,6 +69,7 @@ export function ClimateEvidence({ profile, units, onUnits }: Props) {
               <dt className="text-xs text-muted">{m.label}</dt>
               <dd className="mt-1">
                 <span className="font-mono text-lg">{f.value}</span> <span className="text-xs text-muted">{f.unit}</span>
+                {key === "waterDeficitMm" && m.value !== null && m.value < 0 && <span className="ml-1 text-xs text-muted">(rain surplus)</span>}
                 {m.quality === "partial" && (
                   <span className="ml-1 text-xs text-warn">({Math.round(m.coverage * 100)}% of days)</span>
                 )}
