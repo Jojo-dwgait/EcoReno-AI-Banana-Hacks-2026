@@ -146,7 +146,7 @@ lib/imageEditClient.ts            provider adapter (Gemini now; credits / fal la
 lib/visionClient.ts               scene analysis + review (structured)
 lib/consistencyCheck.ts           review orchestration + retry policy
 lib/changeMap.ts                  pixel diff (runs in the browser canvas)
-lib/homeValue.ts                  comps → regression → cited premiums (pure math + RentCast client)
+lib/valueModel.ts · lib/census.ts · lib/premiums.ts   Census microdata → weighted regression → verified premium tiers
 lib/cache.ts · lib/rateLimit.ts   Upstash Redis (in-memory fallback in dev)
 data/premiums.json                cited value studies (verified before use)
 tests/*.test.ts                   Vitest; fixtures in tests/fixtures/
@@ -161,7 +161,7 @@ scripts/{spike-edit,record-fixtures,fidelity-eval,smoke}.ts
 | `POST /api/analyze-photo` | image → `FeatureInventory` | Never stored or logged |
 | `POST /api/recommend` | `{profile, features, priority, renterMode}` → `Recommendation[]` | Pure function; the route exists for structured logging |
 | `POST /api/generate` | `{image, editPlan}` → `{image, review, attempts}` | Rate-limited; `maxDuration` set; ≤2 attempts |
-| `POST /api/home-value` (P1) | `{lat, lon, beds?, baths?, sqft?, type, upgrades}` → `ValueEstimate` | RentCast; cached hard; fixtures in dev |
+| `POST /api/home-value` (P1) | `{place, propertyType, bedrooms?, builtDecade?, upgrades}` → `ValueEstimate` | Census Geocoder + ACS PUMS + B25077; cached 30 days |
 | `GET /api/hazards` (P2) | `{state, county}` → FEMA National Risk Index ratings | County-level, labeled |
 
 ### 4.5 Core data contracts (sketch)
@@ -254,16 +254,19 @@ type ValueEstimate = { comps: Comp[]; model: {n, r2, predictors}; current: {low,
 
 No species names unless verified. The prompt receives descriptors only.
 
-### 5.5 Home value model (P1)
-- **Comps:** RentCast valuation endpoint at the city's center point, using property type and stories from the photo plus optional beds/baths/sqft. Show 5–10 comps with sources.
-- **Regression:** `log(price) ~ log(sqft) + beds + baths + age`; `log(price) ~ log(sqft)` when n < 12; comp median when R² < 0.3 or n < 6. Show n, R², the interval, and RentCast's own estimate as a sanity check.
-- **Framing:** estimated current value → estimated value with the selected upgrades, as a range itemized per upgrade, mirroring the slider.
-  - Only cited premiums count (`data/premiums.json`, each verified before use; solar is the main one).
-  - Others say "No reliable published estimate".
-  - Always say "associated with" / "estimated", never "will increase".
-  - Always include "Value added is not profit; upgrades cost money"; show cost ranges only where cited.
-  - Label "Illustrative, not an appraisal".
-- **Budget:** 50 free requests/month. Cache by rounded coordinates + attributes; fixtures in dev; pre-warm the demo; fall back gracefully at the cap.
+### 5.5 Home value model (P1; redesigned Oct 10: official sources + our regression)
+- **Locate:** Census Geocoder (no key) → microdata area (PUMA), place, county from the city center. Verified for CA, MN, AZ, AK, HI, ME and unincorporated places.
+- **Training data:** U.S. Census ACS 2020–2024 5-year PUMS for that PUMA. Owner-occupied (TEN 1/2), one-family detached/attached (BLD 02/03), value > 0, adjusted to 2024 dollars with ADJHSG, survey weights WGTP.
+- **Our regression:** weighted least squares, `ln(value) ~ bedrooms + age + age² + attached + lot ≥ 1 acre`; requires ≥ 40 records. Show n, R², residual spread, an 80% range, and the coefficients.
+- **Homes like this:** weighted median and middle half of same-type, same-bedroom, same-era records (widened if fewer than 15).
+- **Official median:** ACS B25077 for the place (county fallback), with margin of error.
+- **Inputs:** home type from the photo; bedrooms and decade built optional (area medians otherwise). No address.
+- **Upgrades (`lib/premiums.ts`, verified Oct 10):**
+  - Direct: LBNL *Selling into the Sun* (2015), about $4/W ($2.60–$5.90/W) × the study's implied ≈3.75 kW system.
+  - Related, shown but not added: USDA Forest Service street trees (+$8,870, Portland, 2010); Henry 1994 landscaping quality (+4–5%).
+  - None: everything else.
+- **Framing:** current → with upgrades, itemized. "Associated with", never "will increase". Census values are owners' own estimates (tend to run high). 2024 dollars, not today's market. Not an appraisal. Value isn't profit.
+- **Needs:** `CENSUS_API_KEY` (free). Responses cached 30 days per area.
 
 ### 5.6 Stretch layers (P2, in this order)
 1. **Renter-friendly mode** (~1 h): a filter plus removable variants.
@@ -330,7 +333,7 @@ Each milestone ends with tests passing and a commit. Times are PDT.
 | Time | Milestone | Tasks | Done when | Rubric |
 |---|---|---|---|---|
 | 7:30–10:30 | **M5 Judge path + polish** | Pre-generate sample results (Irvine + contrast city); "Try a sample house" from cache; `CompareView` (same photo, 2–3 cities, plus a shareable comparison image); error states for every code; a11y pass; watermarked concept-sheet download; next-step links | Fresh browser: sample result < 3 s; compare works live | B, E, D |
-| 10:30–1:00 | **M6 Value panel** | Verify cited studies → `premiums.json`; RentCast client with fixtures; regression; `ValuePanel` (current → with upgrades, itemized, caveats) | Value panel renders for the demo cities with sources; graceful fallback at the cap | D |
+| 10:30–1:00 | **M6 Value panel** | Census key → record real PUMS fixtures for demo areas; check the regression on real data; `ValuePanel` polish (built Sat) | Value panel renders for the demo cities with sources; graceful fallback without key | D |
 | 1:00–1:30 | Lunch + **CP4** | | | |
 | 1:30–3:00 | **M7 Stretch** | Renter mode → FEMA National Risk Index → (2050 only if well ahead) | Each shipped stretch item is tested and labeled | B, D |
 | **3:00** | **FEATURE FREEZE** | Bug fixes only after this point | | |
@@ -364,14 +367,14 @@ Each milestone ends with tests passing and a commit. Times are PDT.
   - Engine: gates, determinism, contrast between cities, no forced diversity, renter filter.
   - Edit plan: preserve and forbidden lists present; no numbers or city names in the prompt.
   - Value math: regression fallback rules, premium itemization, caveats present.
-- **Integration (mocked fetch):** timeout / 429 / 500 → retry → typed error for Open-Meteo, Gemini and RentCast.
+- **Integration (mocked fetch):** timeout / 429 / 500 → retry → typed error for Open-Meteo, Gemini and the Census APIs.
 - **Fixtures:** real recorded Open-Meteo responses for Irvine, Seattle, Phoenix, Minneapolis, Miami, Portland OR, Portland ME, Anchorage and Honolulu (recorded once via script, committed).
 - **Smoke (`npm run smoke`, live APIs):** the acceptance cities, plus a no-match string and a forced provider failure.
 - **Fidelity eval:** 5 photos × 2 plans through the full pipeline → % of changes visible, % pixel change outside targets, retries, and latency, published in the README.
 - **Manual QA checklist (M5, M8):**
   - Fresh incognito desktop browser (Chrome + Safari); light and dark mode; keyboard-only run.
   - Slow network; a non-house photo; a HEIC upload.
-  - Rate limit reached; quota reached; RentCast cap reached.
+  - Rate limit reached; quota reached; Census API unavailable.
 - **Before each commit:** `tsc --noEmit`, lint, tests.
 
 ## 10. Deployment
@@ -398,7 +401,7 @@ Each milestone ends with tests passing and a commit. Times are PDT.
   - What's new (~60) · honesty and limits (~60) · what's next (~50) · built with + AI-assistance disclosure (~50).
 - **README:**
   - Hero GIF/screenshot · live link · what and why · how it works (diagram + model roles) · fidelity eval table.
-  - Data sources and licenses: Open-Meteo (CC BY 4.0), Copernicus ERA5 attribution, CMIP6 (if 2050 ships), FEMA National Risk Index (if shipped), RentCast, photo credit.
+  - Data sources and licenses: Open-Meteo (CC BY 4.0), Copernicus ERA5 attribution, CMIP6 (if 2050 ships), FEMA National Risk Index (if shipped), U.S. Census ACS PUMS and B25077, LBNL / USDA Forest Service / Henry 1994 citations, photo credit.
   - Setup (env vars, scripts) · tests · limitations · AI-assistance disclosure (built with Claude Code) · license.
 
 ## 13. Submission checklist
@@ -431,7 +434,7 @@ Each milestone ends with tests passing and a commit. Times are PDT.
 |---|---|
 | Image editor | Gemini image model (free tier) behind an adapter; credits provider when available; fal FLUX Kontext as fidelity fallback; **no spend without approval** |
 | Vision (analysis + review) | Gemini free tier + pixel change map as the model-independent check |
-| Home value | Comps + our regression + cited premiums; current → with-upgrades framing; "associated with", never "will increase"; cost caveat |
+| Home value (Oct 10) | Official Census microdata + our weighted regression + ACS median + verified premium tiers; replaces RentCast |
 | Location | Data-only site profile; city center point only (no ZIP) |
 | Hazards | FEMA National Risk Index, county-level, P2 |
 | Stretch | Renter mode → FEMA hazards → 2050 mode |
@@ -446,7 +449,7 @@ Each milestone ends with tests passing and a commit. Times are PDT.
 | M0 | Google AI Studio key → paste into `.env.local` yourself; approve photo downloads |
 | Any time | Hackathon compute-credits form when it appears (tell me the provider) |
 | M4 | Vercel account; Upstash Redis account (free); OK to create the private GitHub repo with `gh` |
-| M6 | RentCast Developer key (free) |
+| M6 (now: with the Gemini key at 6 PM) | Census API key (free) → `CENSUS_API_KEY` in `.env.local` |
 | M7 | OK for FEMA data access, if we reach it |
 | M8 | Narration for the video; OK to make the repo public; final Devpost submission |
 

@@ -46,18 +46,14 @@ All inputs in 0–100; these are **design heuristics, not scientific coefficient
 
 Display the exact numerical evidence used in each recommendation; climate numbers must come from response calculations, never invented by an LLM. Explain model/reanalysis uncertainty. Avoid exact predicted savings, permitting, hazard ratings, or engineering claims.
 
-## Home value panel (user decision, 2026-10-09; details in PLAN.md §6b)
-Value figures are allowed **only** in this form:
-1. Cited comparable homes (RentCast) near the selected location.
-2. Our own hedonic regression fit on those comps, showing n, R² and the prediction interval, and falling back to the comp median when the fit is poor.
-3. Upgrade premiums only from cited published studies; otherwise show "No reliable published estimate".
+## Home value panel (user decisions 2026-10-09/10; details in PLAN.md §5.5)
+Value figures are allowed **only** in this form, all from official or peer-reviewed sources:
+1. **Homes like this**: survey-weighted statistics from U.S. Census ACS 2020–2024 5-year PUMS records for the city's microdata area (no listings).
+2. **Our own regression**: weighted least squares of ln(value) trained on those records; always show n, R², residual spread and the 80% range; fall back to comparables when there are too few records.
+3. **Official median**: Census ACS table B25077 for the place (county fallback).
+4. **Upgrade premiums**: only `direct` evidence in `lib/premiums.ts` (currently LBNL solar) is added; `related` evidence is shown but never added; everything else says "No reliable published estimate".
 
-Always label it "Illustrative, not an appraisal". Never require a street address. The panel sits below the before/after slider and never displaces the image workflow.
-
-Present it as estimated current value → estimated value with the selected upgrades (a range, itemized per upgrade). Wording rules:
-- Say "associated with" or "estimated", never "will increase".
-- Include the caveat "Value added is not profit; upgrades cost money."
-- Location adaptation uses the data-only site profile in PLAN.md §5b. City names never select design styles.
+Present it as estimated value now → with the selected upgrades, labeled "Illustrative, not an appraisal", in 2024 dollars, noting that Census values are owners' own estimates. Wording: "associated with" / "estimated", never "will increase"; include "Value added is not profit; upgrades cost money." Never require a street address. The panel sits below the image result and never displaces the image workflow. Location adaptation uses the data-only site profile in PLAN.md §5b; city names never select design styles.
 
 ## Multi-step image AI pipeline (this is the main technical deliverable)
 ```text

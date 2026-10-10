@@ -9,6 +9,7 @@ import { PhotoInput } from "@/components/PhotoInput";
 import { PipelineStepper } from "@/components/PipelineStepper";
 import { RecommendationList } from "@/components/RecommendationList";
 import { ResultView } from "@/components/ResultView";
+import { ValuePanel } from "@/components/ValuePanel";
 import type { PreparedPhoto } from "@/lib/clientImage";
 import { MAX_CHANGES } from "@/lib/editPlan";
 import type { FeatureInventory, FeatureKey } from "@/lib/featureInventory";
@@ -287,8 +288,14 @@ export default function Home() {
         )}
       </Step>
 
+      {gen.kind === "done" && place && inventory && (
+        <Step n="06" title="What these upgrades may mean for value">
+          <ValuePanel place={place} propertyType={inventory.propertyType} upgrades={gen.result.plan.changes.map((c) => c.id)} />
+        </Step>
+      )}
+
       {gen.kind === "done" && photo && profile && inventory && (
-        <Step n={recs ? "06" : "05"} title="Compare another city">
+        <Step n="07" title="Compare another city">
           <CompareView photo={photo} inventory={inventory} confirmed={confirmed} priority={priority} units={units} a={{ profile, result: gen.result }} sample={sample} />
         </Step>
       )}
