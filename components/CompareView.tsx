@@ -11,6 +11,7 @@ import { readGenerateStream, type GenerateResult, type GenerateStage } from "@/l
 import type { Place } from "@/lib/geocode";
 import { INTERVENTION_BY_ID, type InterventionId } from "@/lib/interventions";
 import { recommend, type Priority } from "@/lib/recommendationEngine";
+import { loadSampleResult, type LoadedSample } from "@/lib/samples";
 import type { SiteProfile } from "@/lib/siteProfile";
 
 type Props = {
@@ -20,6 +21,7 @@ type Props = {
   priority: Priority;
   units: UnitSystem;
   a: { profile: SiteProfile; result: GenerateResult };
+  sample?: LoadedSample | null;
 };
 
 type GenState = { kind: "idle" } | { kind: "running"; stages: GenerateStage[]; startedAt: number } | { kind: "done"; result: GenerateResult } | { kind: "error"; message: string };
@@ -42,7 +44,7 @@ function Panel({ src, label, items }: { src: string; label: string; items: strin
   );
 }
 
-export function CompareView({ photo, inventory, confirmed, priority, units, a }: Props) {
+export function CompareView({ photo, inventory, confirmed, priority, units, a, sample }: Props) {
   const [placeB, setPlaceB] = useState<Place | null>(null);
   const [profileB, setProfileB] = useState<SiteProfile | null>(null);
   const [climateError, setClimateError] = useState<string | null>(null);
@@ -82,6 +84,13 @@ export function CompareView({ photo, inventory, confirmed, priority, units, a }:
 
   async function generateB() {
     if (!placeB || picksB.length === 0) return;
+    if (sample) {
+      const saved = await loadSampleResult(sample, placeB.id, picksB).catch(() => null);
+      if (saved) {
+        setGen({ kind: "done", result: saved });
+        return;
+      }
+    }
     setElapsed(0);
     setGen({ kind: "running", stages: [], startedAt: now() });
     try {

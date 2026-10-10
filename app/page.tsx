@@ -17,6 +17,7 @@ import { readGenerateStream, type GenerateResult, type GenerateStage } from "@/l
 import type { Place } from "@/lib/geocode";
 import type { InterventionId } from "@/lib/interventions";
 import { recommend, type Priority } from "@/lib/recommendationEngine";
+import { loadSample, loadSampleResult, type LoadedSample } from "@/lib/samples";
 import type { SiteProfile } from "@/lib/siteProfile";
 
 type Async<T> = { kind: "idle" } | { kind: "loading" } | { kind: "ready"; value: T } | { kind: "error"; message: string };
@@ -56,6 +57,9 @@ export default function Home() {
   const [selectedOverride, setSelectedOverride] = useState<InterventionId[] | null>(null);
   const [gen, setGen] = useState<GenState>({ kind: "idle" });
   const [elapsed, setElapsed] = useState(0);
+  const [sample, setSample] = useState<LoadedSample | null>(null);
+  const [sampleError, setSampleError] = useState<string | null>(null);
+  const [resultNote, setResultNote] = useState<string | null>(null);
   const climateReq = useRef<AbortController | null>(null);
   const analysisReq = useRef<AbortController | null>(null);
 
@@ -77,10 +81,32 @@ export default function Home() {
   function resetDownstream() {
     setSelectedOverride(null);
     setGen({ kind: "idle" });
+    setResultNote(null);
+  }
+
+  async function trySample() {
+    setSampleError(null);
+    try {
+      const s = await loadSample();
+      if (!s) {
+        setSampleError("The sample house isn't available yet.");
+        return;
+      }
+      analysisReq.current?.abort();
+      setSample(s);
+      setPhoto(s.photoData);
+      setAnalysis({ kind: "ready", value: s.inventoryData });
+      setConfirmed({});
+      resetDownstream();
+      if (s.featuredPlaces[0]) await selectPlace(s.featuredPlaces[0]);
+    } catch {
+      setSampleError("Couldn't load the sample house. Please try again.");
+    }
   }
 
   async function choosePhoto(next: PreparedPhoto | null) {
     analysisReq.current?.abort();
+    setSample(null);
     setPhoto(next);
     setConfirmed({});
     resetDownstream();
@@ -124,6 +150,17 @@ export default function Home() {
 
   async function generate() {
     if (!photo || !place || !inventory || selected.length === 0) return;
+    setResultNote(null);
+    if (sample) {
+      const saved = await loadSampleResult(sample, place.id, selected).catch(() => null);
+      if (saved) {
+        setGen({ kind: "done", result: saved });
+        setResultNote(
+          `Pre-generated with this same pipeline on ${new Date(saved.generatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })} so it loads instantly. Change the city or the picks to run it live.`,
+        );
+        return;
+      }
+    }
     setElapsed(0);
     setGen({ kind: "running", stages: [], startedAt: Date.now() });
     try {
@@ -153,7 +190,29 @@ export default function Home() {
       </header>
 
       <Step n="01" title="Your house">
-        <PhotoInput photo={photo} onPhoto={choosePhoto} />
+        <PhotoInput
+          photo={photo}
+          onPhoto={choosePhoto}
+          extraAction={
+            <button type="button" onClick={trySample} className="min-h-11 rounded-md border border-line bg-surface px-4 text-sm font-medium">
+              Try a sample house
+            </button>
+          }
+          caption={
+            <>
+              {sample && (
+                <p className="text-xs text-muted">
+                  Sample photo by{" "}
+                  <a href={sample.credit.url} className="underline" target="_blank" rel="noreferrer">
+                    {sample.credit.name}
+                  </a>{" "}
+                  ({sample.credit.license}).
+                </p>
+              )}
+              {sampleError && <p className="text-sm text-danger">{sampleError}</p>}
+            </>
+          }
+        />
         {analysis.kind === "loading" && (
           <p aria-live="polite" className="text-sm text-muted">
             Checking what&apos;s visible in the photo…
@@ -224,13 +283,13 @@ export default function Home() {
           </p>
         )}
         {gen.kind === "done" && photo && profile && inventory && (
-          <ResultView original={photo.dataUrl} result={gen.result} profile={profile} inventory={inventory} units={units} />
+          <ResultView original={photo.dataUrl} result={gen.result} profile={profile} inventory={inventory} units={units} note={resultNote} />
         )}
       </Step>
 
       {gen.kind === "done" && photo && profile && inventory && (
         <Step n={recs ? "06" : "05"} title="Compare another city">
-          <CompareView photo={photo} inventory={inventory} confirmed={confirmed} priority={priority} units={units} a={{ profile, result: gen.result }} />
+          <CompareView photo={photo} inventory={inventory} confirmed={confirmed} priority={priority} units={units} a={{ profile, result: gen.result }} sample={sample} />
         </Step>
       )}
     </main>

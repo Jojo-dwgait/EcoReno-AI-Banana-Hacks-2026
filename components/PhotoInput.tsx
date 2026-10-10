@@ -1,14 +1,18 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { PhotoError, preparePhoto, type PreparedPhoto } from "@/lib/clientImage";
 
 type Props = {
   photo: PreparedPhoto | null;
   onPhoto: (photo: PreparedPhoto | null) => void;
+  /** e.g. a "Try a sample house" button. */
+  extraAction?: ReactNode;
+  /** e.g. the sample photo's credit line. */
+  caption?: ReactNode;
 };
 
-export function PhotoInput({ photo, onPhoto }: Props) {
+export function PhotoInput({ photo, onPhoto, extraAction, caption }: Props) {
   const inputId = useId();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -53,14 +57,19 @@ export function PhotoInput({ photo, onPhoto }: Props) {
           type="file"
           accept="image/*,.heic,.heif"
           className="sr-only"
-          onChange={(e) => handleFile(e.target.files?.[0])}
+          onChange={(e) => {
+            handleFile(e.target.files?.[0]);
+            e.target.value = "";
+          }}
         />
+        {extraAction}
         {photo && (
           <span className="font-mono text-xs text-muted">
             {photo.width}×{photo.height} · {(photo.bytes / 1024).toFixed(0)} KB · location data removed
           </span>
         )}
       </div>
+      {caption}
       {error && (
         <p role="alert" className="text-sm text-danger">
           {error}

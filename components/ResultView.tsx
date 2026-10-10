@@ -15,6 +15,8 @@ type Props = {
   profile: SiteProfile;
   inventory: FeatureInventory;
   units: UnitSystem;
+  /** Shown when the result was pre-generated (sample house). */
+  note?: string | null;
 };
 
 type MapState = { overlay: string; changedFraction: number; protectedDrift: number | null } | null;
@@ -51,7 +53,7 @@ async function downloadWatermarked(src: string, filename: string) {
   a.click();
 }
 
-export function ResultView({ original, result, profile, inventory, units }: Props) {
+export function ResultView({ original, result, profile, inventory, units, note }: Props) {
   const [showMap, setShowMap] = useState(false);
   const [map, setMap] = useState<MapState>(null);
   const [active, setActive] = useState<string | null>(null);
@@ -136,6 +138,7 @@ export function ResultView({ original, result, profile, inventory, units }: Prop
         )}
       </div>
 
+      {note && <p className="text-sm text-muted">{note}</p>}
       <p className={`rounded-md border p-3 text-sm ${result.verdict === "pass" ? "border-ok text-ok" : "border-warn text-warn"}`}>{verdictText}</p>
 
       <ol className="space-y-3">
