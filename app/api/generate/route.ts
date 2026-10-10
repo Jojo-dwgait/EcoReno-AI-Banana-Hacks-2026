@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const parsed = BodySchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) throw new AppError("BAD_REQUEST", "Choose a photo, a city, and 1–3 changes first.", 400);
     body = parsed.data;
-    enforceLimit("generate", request);
+    await enforceLimit("generate", request);
     try {
       upload = await decodeUpload(body.image);
     } catch {

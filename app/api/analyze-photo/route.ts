@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => null);
     const parsed = z.object({ image: z.string().max(8_000_000) }).safeParse(body);
     if (!parsed.success) throw new AppError("BAD_REQUEST", "Please add a photo first.", 400);
-    enforceLimit("analyze", request);
+    await enforceLimit("analyze", request);
 
     let upload;
     try {

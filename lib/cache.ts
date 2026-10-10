@@ -1,7 +1,6 @@
-/**
- * Small key-value cache. In-memory for local dev; a Redis-backed store is swapped in when
- * UPSTASH_REDIS_REST_URL / _TOKEN are configured (added with deployment, see PLAN.md M4).
- */
+import { getRedis } from "./redis";
+
+/** Small key-value cache: Upstash Redis when configured, otherwise in-memory (local dev, tests). */
 export interface KeyValueCache {
   get<T>(key: string): Promise<T | null>;
   set<T>(key: string, value: T, ttlSeconds: number): Promise<void>;
@@ -30,9 +29,34 @@ class MemoryCache implements KeyValueCache {
   }
 }
 
+class RedisCache implements KeyValueCache {
+  constructor(private readonly memory: MemoryCache) {}
+
+  async get<T>(key: string): Promise<T | null> {
+    const local = await this.memory.get<T>(key);
+    if (local !== null) return local;
+    try {
+      const value = await getRedis()!.get<T>(key);
+      if (value !== null) await this.memory.set(key, value, 600);
+      return value;
+    } catch {
+      return null; // A cache outage must never break the request; the source is fetched instead.
+    }
+  }
+
+  async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
+    await this.memory.set(key, value, Math.min(ttlSeconds, 600));
+    try {
+      await getRedis()!.set(key, value, { ex: ttlSeconds });
+    } catch {
+      /* best effort */
+    }
+  }
+}
+
 const globalForCache = globalThis as unknown as { __ecorenoCache?: KeyValueCache };
 
 export function getCache(): KeyValueCache {
-  globalForCache.__ecorenoCache ??= new MemoryCache();
+  globalForCache.__ecorenoCache ??= getRedis() ? new RedisCache(new MemoryCache()) : new MemoryCache();
   return globalForCache.__ecorenoCache;
 }
