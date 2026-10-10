@@ -1,28 +1,33 @@
 @import "tailwindcss";
 
-/* Field-report palette: neutral paper and ink, one survey-marker accent for markup. */
+/*
+ * Field-report palette.
+ * - paper: cool drafting-vellum gray (deliberately not the warm cream "tasteful default").
+ * - accent: International Orange, the engineering/survey safety orange of the Golden Gate Bridge,
+ *   used only for markup (pins, step numbers, the primary action) like flagging tape on a site plan.
+ */
 :root {
-  --paper: #f3f3f0;
+  --paper: #eff1ee;
   --surface: #ffffff;
-  --ink: #1b1d1a;
-  --muted: #5d6259;
-  --line: #d7d9d2;
-  --accent: #c2410c;
+  --ink: #1a1d1b;
+  --muted: #586058;
+  --line: #d3d8d2;
+  --accent: #c0362c;
   --accent-ink: #ffffff;
-  --ok: #2f6b3a;
+  --ok: #2c6a3b;
   --warn: #8a5a00;
   --danger: #b42318;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #111311;
-    --surface: #191c19;
-    --ink: #e7e8e3;
-    --muted: #a3a89e;
-    --line: #2c302b;
-    --accent: #ff7a3d;
-    --accent-ink: #1b1d1a;
+    --paper: #111412;
+    --surface: #191d1a;
+    --ink: #e6e9e5;
+    --muted: #a2aa9f;
+    --line: #2b312c;
+    --accent: #f0674f;
+    --accent-ink: #1a1d1b;
     --ok: #7cc48a;
     --warn: #e3b341;
     --danger: #ff8a80;
@@ -40,14 +45,25 @@
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-danger: var(--danger);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body-face);
+  --font-mono: var(--font-data-face);
+  --font-display: var(--font-display-face);
+  /* Radius scale: drafting sheets are near-square; controls slightly softened; only pins are round. */
+  --radius-sheet: 2px;
+  --radius-control: 4px;
 }
 
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display-face), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.005em;
 }
 
 :focus-visible {

@@ -34,7 +34,7 @@ function ScoreBar({ r }: { r: Recommendation }) {
         {parts.map((p) => (
           <li key={p.key} className="flex items-center gap-2">
             <span className="w-32">{p.label}</span>
-            <span className="h-1.5 flex-1 overflow-hidden rounded bg-line">
+            <span className="h-1.5 flex-1 overflow-hidden rounded-control bg-line">
               <span className="block h-full bg-ink" style={{ width: `${p.v}%` }} />
             </span>
             <span className="w-24 text-right font-mono">
@@ -63,7 +63,7 @@ export function RecommendationList({ recs, profile, units, priority, onPriority,
             role="radio"
             aria-checked={priority === p}
             onClick={() => onPriority(p)}
-            className={`min-h-11 rounded-md border px-4 text-sm ${priority === p ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface"}`}
+            className={`min-h-11 rounded-control border px-4 text-sm ${priority === p ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface"}`}
           >
             {PRIORITY_LABELS[p]}
           </button>
@@ -80,7 +80,7 @@ export function RecommendationList({ recs, profile, units, priority, onPriority,
           const isSelected = selected.includes(r.id);
           const disabled = !isSelected && selected.length >= max;
           return (
-            <li key={r.id} className={`rounded-md border bg-surface p-4 ${isSelected ? "border-accent" : "border-line"}`}>
+            <li key={r.id} className={`rounded-sheet border bg-surface p-4 ${isSelected ? "border-accent" : "border-line"}`}>
               <label className={`flex gap-3 ${disabled ? "opacity-60" : "cursor-pointer"}`}>
                 <input type="checkbox" className="mt-1 h-5 w-5 accent-[var(--accent)]" checked={isSelected} disabled={disabled} onChange={() => onToggle(r.id)} />
                 <span className="flex-1 space-y-2">
@@ -95,7 +95,7 @@ export function RecommendationList({ recs, profile, units, priority, onPriority,
                     {iv.evidence.map((k) => {
                       const f = formatMetric(profile.climate.metrics[k], units);
                       return (
-                        <span key={k} className="rounded border border-line px-1.5 py-0.5 font-mono text-xs" title={profile.climate.metrics[k].definition}>
+                        <span key={k} className="rounded-control border border-line px-1.5 py-0.5 font-mono text-xs" title={profile.climate.metrics[k].definition}>
                           {profile.climate.metrics[k].label}: {f.value} {f.unit}
                         </span>
                       );
@@ -115,7 +115,7 @@ export function RecommendationList({ recs, profile, units, priority, onPriority,
       </ul>
 
       {(weak.length > 0 || blocked.length > 0) && (
-        <details className="rounded-md border border-line bg-surface p-4 text-sm">
+        <details className="rounded-sheet border border-line bg-surface p-4 text-sm">
           <summary className="cursor-pointer font-medium">
             Not suggested here ({weak.length + blocked.length}), and why
           </summary>

@@ -34,9 +34,9 @@ export function ClimateEvidence({ profile, units, onUnits }: Props) {
     <section aria-labelledby="climate-heading" className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h3 id="climate-heading" className="text-lg font-semibold">
-          Climate evidence for {profile.place.label}
+          {profile.place.label}<span className="ml-2 font-mono text-sm font-normal text-muted">daily record, 2016–2025</span>
         </h3>
-        <div role="group" aria-label="Units" className="inline-flex overflow-hidden rounded-md border border-line text-sm">
+        <div role="group" aria-label="Units" className="inline-flex overflow-hidden rounded-sheet border border-line text-sm">
           {(["us", "metric"] as const).map((u) => (
             <button
               key={u}
@@ -53,14 +53,14 @@ export function ClimateEvidence({ profile, units, onUnits }: Props) {
 
       <ul className="flex flex-wrap gap-2">
         {badges.map((b) => (
-          <li key={b.label} className="rounded-md border border-line bg-surface px-3 py-1.5 text-sm">
+          <li key={b.label} className="rounded-sheet border border-line bg-surface px-3 py-1.5 text-sm">
             <span className="text-muted">{b.label}: </span>
             <span className="font-medium">{b.value}</span>
           </li>
         ))}
       </ul>
 
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-3 lg:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-sheet border border-line bg-line sm:grid-cols-3 lg:grid-cols-4">
         {SHOWN.map((key) => {
           const m = climate.metrics[key];
           const f = formatMetric(m, units);

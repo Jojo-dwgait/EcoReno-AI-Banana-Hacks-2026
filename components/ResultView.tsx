@@ -120,13 +120,13 @@ export function ResultView({ original, result, profile, inventory, units, note }
       />
 
       <div className="flex flex-wrap items-center gap-3">
-        <button type="button" aria-pressed={showMap} onClick={() => setShowMap((v) => !v)} className="min-h-11 rounded-md border border-line bg-surface px-4 text-sm font-medium" disabled={!map}>
+        <button type="button" aria-pressed={showMap} onClick={() => setShowMap((v) => !v)} className="min-h-11 rounded-control border border-line bg-surface px-4 text-sm font-medium" disabled={!map}>
           {showMap ? "Hide change map" : "Show change map"}
         </button>
         <button
           type="button"
           onClick={() => downloadWatermarked(result.image, `ecoreno-concept-${profile.place.name.toLowerCase().replace(/\W+/g, "-")}.jpg`)}
-          className="min-h-11 rounded-md border border-line bg-surface px-4 text-sm font-medium"
+          className="min-h-11 rounded-control border border-line bg-surface px-4 text-sm font-medium"
         >
           Download concept (watermarked)
         </button>
@@ -139,7 +139,7 @@ export function ResultView({ original, result, profile, inventory, units, note }
       </div>
 
       {note && <p className="text-sm text-muted">{note}</p>}
-      <p className={`rounded-md border p-3 text-sm ${result.verdict === "pass" ? "border-ok text-ok" : "border-warn text-warn"}`}>{verdictText}</p>
+      <p className={`rounded-sheet border p-3 text-sm ${result.verdict === "pass" ? "border-ok text-ok" : "border-warn text-warn"}`}>{verdictText}</p>
 
       <ol className="space-y-3">
         {changes.map((c, i) => {
@@ -151,7 +151,7 @@ export function ResultView({ original, result, profile, inventory, units, note }
               id={`change-${c.id}`}
               onMouseEnter={() => setActive(c.id)}
               onMouseLeave={() => setActive(null)}
-              className={`scroll-mt-4 rounded-md border bg-surface p-4 ${active === c.id ? "border-accent" : "border-line"}`}
+              className={`scroll-mt-4 rounded-sheet border bg-surface p-4 ${active === c.id ? "border-accent" : "border-line"}`}
             >
               <div className="flex flex-wrap items-baseline gap-3">
                 <span className="font-mono text-sm text-accent">{String(i + 1).padStart(2, "0")}</span>
@@ -176,7 +176,7 @@ export function ResultView({ original, result, profile, inventory, units, note }
                   {iv.evidence.map((k) => {
                     const f = formatMetric(profile.climate.metrics[k], units);
                     return (
-                      <span key={k} className="rounded border border-line px-1.5 py-0.5 font-mono text-xs">
+                      <span key={k} className="rounded-control border border-line px-1.5 py-0.5 font-mono text-xs">
                         {profile.climate.metrics[k].label}: {f.value} {f.unit}
                       </span>
                     );
@@ -198,7 +198,7 @@ export function ResultView({ original, result, profile, inventory, units, note }
       </ol>
 
       {review && (
-        <details className="rounded-md border border-line bg-surface p-4 text-sm">
+        <details className="rounded-sheet border border-line bg-surface p-4 text-sm">
           <summary className="cursor-pointer font-medium">
             Preservation check: {review.perPreserve.filter((p) => p.kept).length}/{review.perPreserve.length} kept
             {review.unrequestedChanges.length > 0 ? ` · ${review.unrequestedChanges.length} unrequested change(s)` : ""}
@@ -224,7 +224,7 @@ export function ResultView({ original, result, profile, inventory, units, note }
         </details>
       )}
 
-      <details className="rounded-md border border-line bg-surface p-4 text-sm">
+      <details className="rounded-sheet border border-line bg-surface p-4 text-sm">
         <summary className="cursor-pointer font-medium">How this image was made</summary>
         <ul className="mt-3 space-y-1 font-mono text-xs">
           <li>Image model: {result.models.edit}</li>
@@ -237,7 +237,7 @@ export function ResultView({ original, result, profile, inventory, units, note }
           ))}
         </ul>
         <p className="mt-3 text-muted">The exact instructions sent to the image model (no climate numbers or city names, so the model can&apos;t fall back on stereotypes):</p>
-        <pre className="mt-2 max-h-72 overflow-auto rounded bg-paper p-3 text-xs whitespace-pre-wrap">{result.prompt}</pre>
+        <pre className="mt-2 max-h-72 overflow-auto rounded-control bg-paper p-3 text-xs whitespace-pre-wrap">{result.prompt}</pre>
       </details>
 
       <p className="text-xs text-muted">

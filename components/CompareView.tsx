@@ -35,7 +35,7 @@ function Panel({ src, label, items }: { src: string; label: string; items: strin
   return (
     <figure className="space-y-2">
       {/* eslint-disable-next-line @next/next/no-img-element -- data URL */}
-      <img src={src} alt={`${label}: ${items.join(", ") || "original photo"}`} className="w-full rounded-md border border-line" />
+      <img src={src} alt={`${label}: ${items.join(", ") || "original photo"}`} className="w-full rounded-sheet border border-line" />
       <figcaption className="text-sm">
         <span className="font-medium">{label}</span>
         {items.length > 0 && <span className="block text-xs text-muted">{items.join(" · ")}</span>}
@@ -165,7 +165,7 @@ export function CompareView({ photo, inventory, confirmed, priority, units, a, s
           </p>
 
           {gen.kind !== "running" && gen.kind !== "done" && picksB.length > 0 && (
-            <button type="button" onClick={generateB} className="min-h-12 rounded-md bg-accent px-6 font-semibold text-accent-ink">
+            <button type="button" onClick={generateB} className="min-h-12 rounded-control bg-accent px-6 font-semibold text-accent-ink">
               Edit the same photo for {profileB.place.label}
             </button>
           )}

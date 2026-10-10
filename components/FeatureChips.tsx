@@ -27,7 +27,7 @@ export function FeatureChips({ inventory, confirmed, onConfirm }: Props) {
                 aria-pressed={present}
                 onClick={() => onConfirm(k, !present)}
                 title={f.note || undefined}
-                className={`min-h-11 rounded-md border px-3 text-sm ${present ? "border-ink bg-ink text-paper" : "border-line bg-surface text-muted line-through"}`}
+                className={`min-h-11 rounded-control border px-3 text-sm ${present ? "border-ink bg-ink text-paper" : "border-line bg-surface text-muted line-through"}`}
               >
                 {FEATURE_LABELS[k]}
                 <span className="ml-2 font-mono text-xs opacity-80">{corrected ? "you set" : `${Math.round(f.confidence * 100)}%`}</span>

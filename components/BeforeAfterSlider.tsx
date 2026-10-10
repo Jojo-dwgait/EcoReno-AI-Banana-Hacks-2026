@@ -19,7 +19,7 @@ export function BeforeAfterSlider({ before, after, width, height, afterAlt, unde
   const [pos, setPos] = useState(50);
   return (
     <figure className="space-y-2">
-      <div className="relative overflow-hidden rounded-md border border-line" style={{ aspectRatio: `${width} / ${height}` }}>
+      <div className="relative overflow-hidden rounded-sheet border border-line" style={{ aspectRatio: `${width} / ${height}` }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- data URLs */}
         <img src={after} alt={afterAlt} className="absolute inset-0 h-full w-full object-cover" />
         {underlay && <div className="pointer-events-none absolute inset-0">{underlay}</div>}
@@ -33,8 +33,8 @@ export function BeforeAfterSlider({ before, after, width, height, afterAlt, unde
         <div aria-hidden className="pointer-events-none absolute inset-y-0 w-0.5 bg-accent" style={{ left: `${pos}%` }}>
           <div className="absolute top-1/2 left-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-accent bg-surface" />
         </div>
-        <span className="pointer-events-none absolute top-2 left-2 rounded bg-ink/80 px-2 py-0.5 font-mono text-xs text-paper">Original</span>
-        <span className="pointer-events-none absolute top-2 right-2 rounded bg-accent px-2 py-0.5 font-mono text-xs text-accent-ink">Concept</span>
+        <span className="pointer-events-none absolute top-2 left-2 rounded-control bg-ink/80 px-2 py-0.5 font-mono text-xs text-paper">Original</span>
+        <span className="pointer-events-none absolute top-2 right-2 rounded-control bg-accent px-2 py-0.5 font-mono text-xs text-accent-ink">Concept</span>
         <input
           type="range"
           min={0}

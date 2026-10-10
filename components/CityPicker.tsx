@@ -56,7 +56,7 @@ export function CityPicker({ selected, onSelect }: Props) {
 
   if (selected) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-line bg-surface p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-sheet border border-line bg-surface p-4">
         <div>
           <p className="font-medium">
             {selected.name}, {selected.state}
@@ -66,7 +66,7 @@ export function CityPicker({ selected, onSelect }: Props) {
             {selected.lat.toFixed(3)}, {selected.lon.toFixed(3)} · {selected.timezone}
           </p>
         </div>
-        <button type="button" onClick={() => onSelect(null)} className="min-h-11 rounded-md border border-line px-4 text-sm font-medium">
+        <button type="button" onClick={() => onSelect(null)} className="min-h-11 rounded-control border border-line px-4 text-sm font-medium">
           Change city
         </button>
       </div>
@@ -103,7 +103,7 @@ export function CityPicker({ selected, onSelect }: Props) {
           }
         }}
         placeholder="Start typing a city…"
-        className="min-h-11 w-full rounded-md border border-line bg-surface px-3"
+        className="min-h-11 w-full rounded-control border border-line bg-surface px-3"
       />
       <div aria-live="polite" className="text-sm text-muted">
         {current.kind === "loading" && "Searching…"}
@@ -111,7 +111,7 @@ export function CityPicker({ selected, onSelect }: Props) {
         {current.kind === "results" && `${places.length} U.S. match${places.length === 1 ? "" : "es"}. Pick the right one.`}
       </div>
       {places.length > 0 && (
-        <ul id={listId} role="listbox" className="divide-y divide-line overflow-hidden rounded-md border border-line bg-surface">
+        <ul id={listId} role="listbox" className="divide-y divide-line overflow-hidden rounded-sheet border border-line bg-surface">
           {places.map((p, i) => (
             <li
               key={p.id}

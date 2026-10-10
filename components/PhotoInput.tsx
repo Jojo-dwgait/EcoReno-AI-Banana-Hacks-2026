@@ -35,11 +35,11 @@ export function PhotoInput({ photo, onPhoto, extraAction, caption }: Props) {
     <div className="space-y-3">
       {photo ? (
         // eslint-disable-next-line @next/next/no-img-element -- local data URL preview
-        <img src={photo.dataUrl} alt="Your uploaded house photo" className="w-full rounded-md border border-line" />
+        <img src={photo.dataUrl} alt="Your uploaded house photo" className="w-full rounded-sheet border border-line" />
       ) : (
         <label
           htmlFor={inputId}
-          className="flex min-h-48 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed border-line bg-surface p-6 text-center"
+          className="flex min-h-48 cursor-pointer flex-col items-center justify-center gap-2 rounded-sheet border border-dashed border-line bg-surface p-6 text-center"
         >
           <span className="font-medium">Add a photo of a house exterior</span>
           <span className="text-sm text-muted">A front view with the yard, roof, and windows visible works best. JPEG or PNG.</span>
@@ -48,7 +48,7 @@ export function PhotoInput({ photo, onPhoto, extraAction, caption }: Props) {
       <div className="flex flex-wrap items-center gap-3">
         <label
           htmlFor={inputId}
-          className="inline-flex min-h-11 cursor-pointer items-center rounded-md border border-line bg-surface px-4 text-sm font-medium"
+          className="inline-flex min-h-11 cursor-pointer items-center rounded-control border border-line bg-surface px-4 text-sm font-medium"
         >
           {busy ? "Preparing photo…" : photo ? "Choose a different photo" : "Choose photo"}
         </label>

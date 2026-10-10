@@ -194,7 +194,7 @@ export default function Home() {
           photo={photo}
           onPhoto={choosePhoto}
           extraAction={
-            <button type="button" onClick={trySample} className="min-h-11 rounded-md border border-line bg-surface px-4 text-sm font-medium">
+            <button type="button" onClick={trySample} className="min-h-11 rounded-control border border-line bg-surface px-4 text-sm font-medium">
               Try a sample house
             </button>
           }
@@ -271,7 +271,7 @@ export default function Home() {
             type="button"
             onClick={generate}
             disabled={selected.length === 0}
-            className="min-h-12 rounded-md bg-accent px-6 font-semibold text-accent-ink disabled:opacity-50"
+            className="min-h-12 rounded-control bg-accent px-6 font-semibold text-accent-ink disabled:opacity-50"
           >
             {gen.kind === "done" ? "Generate again" : `Edit my photo with ${selected.length} change${selected.length === 1 ? "" : "s"}`}
           </button>

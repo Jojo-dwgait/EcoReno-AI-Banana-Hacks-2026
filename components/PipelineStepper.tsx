@@ -16,7 +16,7 @@ export function PipelineStepper({ stages, elapsedSec }: { stages: GenerateStage[
   const currentIndex = STEPS.findIndex((s) => s.key === currentKey);
 
   return (
-    <div aria-live="polite" className="space-y-3 rounded-md border border-line bg-surface p-4">
+    <div aria-live="polite" className="space-y-3 rounded-sheet border border-line bg-surface p-4">
       <ol className="space-y-2">
         {STEPS.map((s, i) => {
           const state = i < currentIndex ? "done" : i === currentIndex ? "active" : "todo";
