@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import type { Place } from "@/lib/geocode";
+import { countyLabel, type Place } from "@/lib/geocode";
 
 type Props = {
   selected: Place | null;
@@ -62,7 +62,7 @@ export function CityPicker({ selected, onSelect }: Props) {
             {selected.name}, {selected.state}
           </p>
           <p className="font-mono text-xs text-muted">
-            {selected.county ? `${selected.county} County · ` : ""}
+            {selected.county ? `${countyLabel(selected.county)} · ` : ""}
             {selected.lat.toFixed(3)}, {selected.lon.toFixed(3)} · {selected.timezone}
           </p>
         </div>
@@ -126,7 +126,7 @@ export function CityPicker({ selected, onSelect }: Props) {
                 {p.name}, {p.state}
               </span>
               <span className="ml-2 font-mono text-xs text-muted">
-                {p.county ? `${p.county} County` : ""}
+                {countyLabel(p.county) ?? ""}
                 {p.population ? ` · pop. ${p.population.toLocaleString("en-US")}` : ""}
               </span>
             </li>

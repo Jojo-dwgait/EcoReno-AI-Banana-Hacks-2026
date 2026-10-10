@@ -33,6 +33,12 @@ const ResultSchema = z.object({
 const ResponseSchema = z.object({ results: z.array(ResultSchema).optional() });
 type GeoResult = z.infer<typeof ResultSchema>;
 
+/** "Orange" → "Orange County", but keep names that already carry a type (Miami-Dade County, Anchorage Municipality, CT planning regions). */
+export function countyLabel(admin2: string | null): string | null {
+  if (!admin2) return null;
+  return /\b(County|Parish|Borough|Municipality|Region|Census Area|city|City and Borough)\b/.test(admin2) ? admin2 : `${admin2} County`;
+}
+
 const normalize = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 

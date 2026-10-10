@@ -26,8 +26,8 @@ export function ClimateEvidence({ profile, units, onUnits }: Props) {
   const badges = [
     classes.koppen && { label: "Climate type", value: `${classes.koppen.code} · ${classes.koppen.description}` },
     classes.aridityClass && { label: "Aridity", value: `${classes.aridityClass} (P/ET₀ ${classes.aridityIndex?.toFixed(2)})` },
-    classes.hardinessZone && { label: "Plant zone", value: `≈ ${classes.hardinessZone.label} (approximate)` },
-    classes.thermalDominance && { label: "Energy demand", value: `${classes.thermalDominance}-dominated` },
+    classes.hardinessZone && { label: "Plant zone", value: `≈ ${classes.hardinessZone.label} (approximate; may be colder at your site)` },
+    classes.thermalDominance && { label: "Energy demand", value: classes.thermalDominance === "mixed" ? "mixed heating and cooling" : `${classes.thermalDominance}-dominated` },
   ].filter(Boolean) as { label: string; value: string }[];
 
   return (

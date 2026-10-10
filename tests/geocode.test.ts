@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { AppError } from "../lib/errors";
-import { parseQuery, searchUsPlaces, toUsPlaces } from "../lib/geocode";
+import { countyLabel, parseQuery, searchUsPlaces, toUsPlaces } from "../lib/geocode";
 
 const r = (over: Record<string, unknown>) => ({
   id: 1,
@@ -72,5 +72,17 @@ describe("searchUsPlaces", () => {
     expect(err).toBeInstanceOf(AppError);
     expect(err.code).toBe("GEOCODE_UNAVAILABLE");
     expect(fetchImpl).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("countyLabel", () => {
+  it.each([
+    ["Orange", "Orange County"],
+    ["Miami-Dade County", "Miami-Dade County"],
+    ["Anchorage Municipality", "Anchorage Municipality"],
+    ["Lower Connecticut River Valley Planning Region", "Lower Connecticut River Valley Planning Region"],
+    ["Orleans Parish", "Orleans Parish"],
+  ])("%s → %s", (admin2, label) => {
+    expect(countyLabel(admin2)).toBe(label);
   });
 });
