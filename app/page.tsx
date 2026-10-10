@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CityPicker } from "@/components/CityPicker";
+import { CompareView } from "@/components/CompareView";
 import { ClimateEvidence } from "@/components/ClimateEvidence";
 import { FeatureChips } from "@/components/FeatureChips";
 import { PhotoInput } from "@/components/PhotoInput";
@@ -226,6 +227,12 @@ export default function Home() {
           <ResultView original={photo.dataUrl} result={gen.result} profile={profile} inventory={inventory} units={units} />
         )}
       </Step>
+
+      {gen.kind === "done" && photo && profile && inventory && (
+        <Step n={recs ? "06" : "05"} title="Compare another city">
+          <CompareView photo={photo} inventory={inventory} confirmed={confirmed} priority={priority} units={units} a={{ profile, result: gen.result }} />
+        </Step>
+      )}
     </main>
   );
 }
