@@ -129,3 +129,20 @@ describe("edit plan and prompt", () => {
     expect(sanitizeSceneText("x".repeat(200)).length).toBe(80);
   });
 });
+
+describe("renter mode", () => {
+  it("uses removable variants in the edit plan", () => {
+    const profile = loadFixtureProfile("irvine");
+    const owner = buildEditPlan(["shade-awnings"], profile, fullInventory());
+    const renter = buildEditPlan(["shade-awnings"], profile, fullInventory(), { renterMode: true });
+    expect(owner.changes[0].instruction).toMatch(/awnings/);
+    expect(renter.changes[0].instruction).toMatch(/removable/);
+    expect(renter.changes[0].instruction).not.toEqual(owner.changes[0].instruction);
+  });
+
+  it("preselects only renter-friendly changes", () => {
+    const recs = recommend({ profile: loadFixtureProfile("irvine"), inventory: fullInventory(), priority: "balanced", renterMode: true });
+    for (const r of recs.filter((x) => x.preselected)) expect(INTERVENTION_BY_ID[r.id].renterFriendly).toBe(true);
+    expect(recs.some((r) => r.preselected)).toBe(true);
+  });
+});

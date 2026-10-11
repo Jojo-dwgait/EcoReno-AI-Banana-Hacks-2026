@@ -17,6 +17,7 @@ const BodySchema = z.object({
   place: PlaceSchema,
   selected: z.array(z.enum(ids)).min(1).max(MAX_CHANGES),
   inventory: FeatureInventorySchema,
+  renterMode: z.boolean().optional(),
 });
 
 /**
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
       try {
         send({ stage: "plan" });
         const { profile } = await getSiteProfile(body.place);
-        const plan = buildEditPlan([...new Set(body.selected)], profile, body.inventory);
+        const plan = buildEditPlan([...new Set(body.selected)], profile, body.inventory, { renterMode: body.renterMode });
         const result = await runGeneration(new GeminiImageEditor(), { mimeType: "image/jpeg", ...upload }, plan, (e: StageEvent) => send(e));
         console.log(
           JSON.stringify({ stage: "generate", placeId: body.place.id, selected: body.selected, attempts: result.attempts, verdict: result.verdict, totalMs: Date.now() - started }),

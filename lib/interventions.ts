@@ -36,6 +36,8 @@ export type Intervention = {
   evidence: MetricKey[];
   explain: (p: SiteProfile, units: UnitSystem) => string;
   instruction: (p: SiteProfile) => { instruction: string; styleDescriptors: string[] };
+  /** Removable version used in renter mode (nothing permanently mounted). */
+  renterInstruction?: (p: SiteProfile) => { instruction: string; styleDescriptors: string[] };
   caveat: string;
 };
 
@@ -142,6 +144,10 @@ export const INTERVENTIONS: Intervention[] = [
       instruction: "Add simple fabric awnings directly above the front-facing windows.",
       styleDescriptors: ["muted neutral fabric that matches the house colors", "modest projection"],
     }),
+    renterInstruction: () => ({
+      instruction: "Add removable exterior roller shades hung just above the front-facing windows, with no permanent mounting.",
+      styleDescriptors: ["muted neutral fabric that matches the house colors", "simple clamp-on or tension-mounted hardware"],
+    }),
     caveat: "Most effective on windows facing the afternoon sun.",
   },
   {
@@ -193,6 +199,10 @@ export const INTERVENTIONS: Intervention[] = [
     instruction: () => ({
       instruction: "Add one rain barrel connected to a downspout at a corner of the house.",
       styleDescriptors: ["dark green or brown barrel on a low stand", "neatly connected to the downspout"],
+    }),
+    renterInstruction: () => ({
+      instruction: "Add one freestanding rain barrel on a low stand at a corner of the house, fed by a flexible diverter from the downspout.",
+      styleDescriptors: ["dark green or brown barrel", "no permanent plumbing changes"],
     }),
     caveat: "Small storage; check local rules on rainwater use.",
   },

@@ -14,6 +14,8 @@ type Props = {
   selected: InterventionId[];
   onToggle: (id: InterventionId) => void;
   max: number;
+  renterMode: boolean;
+  onRenterMode: (v: boolean) => void;
 };
 
 const CATEGORY_LABEL = { water: "Water", heat: "Heat", energy: "Energy", stormwater: "Stormwater" } as const;
@@ -48,7 +50,7 @@ function ScoreBar({ r }: { r: Recommendation }) {
   );
 }
 
-export function RecommendationList({ recs, profile, units, priority, onPriority, selected, onToggle, max }: Props) {
+export function RecommendationList({ recs, profile, units, priority, onPriority, selected, onToggle, max, renterMode, onRenterMode }: Props) {
   const available = recs.filter((r) => !r.blockedReason && !r.lowRelevance);
   const weak = recs.filter((r) => !r.blockedReason && r.lowRelevance);
   const blocked = recs.filter((r) => r.blockedReason);
@@ -69,6 +71,11 @@ export function RecommendationList({ recs, profile, units, priority, onPriority,
           </button>
         ))}
       </div>
+
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" className="h-5 w-5 accent-[var(--accent)]" checked={renterMode} onChange={(e) => onRenterMode(e.target.checked)} />
+        I rent this home: only show removable changes
+      </label>
 
       <p className="text-sm text-muted">
         Pick up to {max}. Suggestions are ranked by this location&apos;s climate evidence and what&apos;s visible in your photo.

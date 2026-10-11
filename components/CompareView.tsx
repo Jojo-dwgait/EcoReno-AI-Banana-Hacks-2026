@@ -22,6 +22,7 @@ type Props = {
   units: UnitSystem;
   a: { profile: SiteProfile; result: GenerateResult };
   sample?: LoadedSample | null;
+  renterMode?: boolean;
 };
 
 type GenState = { kind: "idle" } | { kind: "running"; stages: GenerateStage[]; startedAt: number } | { kind: "done"; result: GenerateResult } | { kind: "error"; message: string };
@@ -44,7 +45,7 @@ function Panel({ src, label, items }: { src: string; label: string; items: strin
   );
 }
 
-export function CompareView({ photo, inventory, confirmed, priority, units, a, sample }: Props) {
+export function CompareView({ photo, inventory, confirmed, priority, units, a, sample, renterMode = false }: Props) {
   const [placeB, setPlaceB] = useState<Place | null>(null);
   const [profileB, setProfileB] = useState<SiteProfile | null>(null);
   const [climateError, setClimateError] = useState<string | null>(null);
@@ -58,7 +59,7 @@ export function CompareView({ photo, inventory, confirmed, priority, units, a, s
     return () => clearInterval(t);
   }, [gen]);
 
-  const recsB = profileB ? recommend({ profile: profileB, inventory, priority, confirmed }) : null;
+  const recsB = profileB ? recommend({ profile: profileB, inventory, priority, confirmed, renterMode }) : null;
   const picksB: InterventionId[] = recsB?.filter((r) => r.preselected).map((r) => r.id) ?? [];
   const picksA = a.result.plan.changes.map((c) => c.id);
   const sameSet = picksB.length > 0 && picksB.length === picksA.length && picksB.every((id) => picksA.includes(id));
@@ -97,7 +98,7 @@ export function CompareView({ photo, inventory, confirmed, priority, units, a, s
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ image: photo.dataUrl, place: placeB, selected: picksB, inventory }),
+        body: JSON.stringify({ image: photo.dataUrl, place: placeB, selected: picksB, inventory, renterMode }),
       });
       const result = await readGenerateStream(res, (s) => setGen((g) => (g.kind === "running" ? { ...g, stages: [...g.stages, s] } : g)));
       setGen({ kind: "done", result });

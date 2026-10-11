@@ -55,6 +55,7 @@ export default function Home() {
   const [units, setUnits] = useState<UnitSystem>("us");
   const [confirmed, setConfirmed] = useState<Partial<Record<FeatureKey, boolean>>>({});
   const [priority, setPriority] = useState<Priority>("balanced");
+  const [renterMode, setRenterMode] = useState(false);
   const [selectedOverride, setSelectedOverride] = useState<InterventionId[] | null>(null);
   const [gen, setGen] = useState<GenState>({ kind: "idle" });
   const [elapsed, setElapsed] = useState(0);
@@ -76,8 +77,8 @@ export default function Home() {
   }, [analysis, manualFeatures, hasPhoto, markedRoof]);
 
   const recs = useMemo(
-    () => (profile && inventory ? recommend({ profile, inventory, priority, confirmed }) : null),
-    [profile, inventory, priority, confirmed],
+    () => (profile && inventory ? recommend({ profile, inventory, priority, confirmed, renterMode }) : null),
+    [profile, inventory, priority, confirmed, renterMode],
   );
   const selected = selectedOverride ?? recs?.filter((r) => r.preselected).map((r) => r.id) ?? [];
 
@@ -177,7 +178,7 @@ export default function Home() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ image: photo.dataUrl, place, selected, inventory }),
+        body: JSON.stringify({ image: photo.dataUrl, place, selected, inventory, renterMode }),
       });
       const result = await readGenerateStream(res, (s) =>
         setGen((g) => (g.kind === "running" ? { ...g, stages: [...g.stages, s] } : g)),
@@ -275,6 +276,11 @@ export default function Home() {
             selected={selected}
             onToggle={toggle}
             max={MAX_CHANGES}
+            renterMode={renterMode}
+            onRenterMode={(v) => {
+              setRenterMode(v);
+              setSelectedOverride(null);
+            }}
           />
         </Step>
       )}
@@ -310,7 +316,7 @@ export default function Home() {
 
       {gen.kind === "done" && photo && profile && inventory && (
         <Step n="07" title="Compare another city">
-          <CompareView photo={photo} inventory={inventory} confirmed={confirmed} priority={priority} units={units} a={{ profile, result: gen.result }} sample={sample} />
+          <CompareView photo={photo} inventory={inventory} confirmed={confirmed} priority={priority} units={units} a={{ profile, result: gen.result }} sample={sample} renterMode={renterMode} />
         </Step>
       )}
     </main>

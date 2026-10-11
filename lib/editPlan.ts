@@ -20,11 +20,17 @@ export function sanitizeSceneText(s: string, max = 80): string {
   return s.replace(/[\r\n\t"`]+/g, " ").replace(/\s{2,}/g, " ").trim().slice(0, max);
 }
 
-export function buildEditPlan(selected: InterventionId[], profile: SiteProfile, inventory: FeatureInventory): EditPlan {
+export function buildEditPlan(
+  selected: InterventionId[],
+  profile: SiteProfile,
+  inventory: FeatureInventory,
+  options: { renterMode?: boolean } = {},
+): EditPlan {
   if (selected.length === 0 || selected.length > MAX_CHANGES) throw new Error(`Select between 1 and ${MAX_CHANGES} changes.`);
   const changes = selected.map((id) => {
     const iv = INTERVENTION_BY_ID[id];
-    const { instruction, styleDescriptors } = iv.instruction(profile);
+    const variant = options.renterMode && iv.renterInstruction ? iv.renterInstruction : iv.instruction;
+    const { instruction, styleDescriptors } = variant(profile);
     const note = sanitizeSceneText(inventory.features[iv.target].note);
     return {
       id,
