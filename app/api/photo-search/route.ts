@@ -6,10 +6,11 @@ import { SearchResponse, searchQuery, toHit, type SearchHit } from "@/lib/unspla
 const DAY = 86_400;
 
 export async function GET(request: Request) {
+  // Read the request before the try block so Next's "render at request time" signal isn't swallowed by errorResponse.
+  const params = new URL(request.url).searchParams;
   try {
     const key = process.env.UNSPLASH_ACCESS_KEY;
     if (!key) throw new AppError("PHOTO_SEARCH_UNAVAILABLE", "Photo search isn't configured on this server yet. Try one of the sample homes.", 503);
-    const params = new URL(request.url).searchParams;
     const raw = (params.get("q") ?? "").trim();
     const page = Math.min(5, Math.max(1, Number(params.get("page")) || 1));
     if (raw.length < 2) throw new AppError("BAD_REQUEST", "Type a house style or feature to search, like “brick ranch”.", 400);

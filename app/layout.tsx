@@ -8,7 +8,7 @@ import "./globals.css";
 // - IBM Plex Sans for body copy: drawn for engineering documentation, reads as a field report.
 // - IBM Plex Mono for every number: climate readings look like instrument output and align in tables.
 const display = Barlow_Semi_Condensed({ variable: "--font-display-face", subsets: ["latin"], weight: ["500", "600", "700"] });
-const body = IBM_Plex_Sans({ variable: "--font-body-face", subsets: ["latin"], weight: ["400", "500", "600"] });
+const body = IBM_Plex_Sans({ variable: "--font-body-face", subsets: ["latin"] });
 const data = IBM_Plex_Mono({ variable: "--font-data-face", subsets: ["latin"], weight: ["400", "500"] });
 
 export const metadata: Metadata = {

@@ -70,7 +70,7 @@ npm run dev                  # http://localhost:3000
 City search and climate data need no keys.
 
 ```bash
-npm test                       # 126 unit tests, incl. real recorded data for 9 cities
+npm test                       # 130 unit tests, incl. real recorded data for 9 cities
 npm run typecheck
 npx tsx scripts/profile-report.ts      # climate classes for every recorded city
 npx tsx scripts/engine-report.ts       # ranked upgrades per city
@@ -96,4 +96,4 @@ Weather data: [Open-Meteo](https://open-meteo.com/) Historical Weather API (CC B
 
 ## How this was built
 
-I built EcoReno during the Banana Hacks 2026 event window (Oct 9–11) with Claude Code (Anthropic) as my coding assistant for planning, code, tests and review. Image editing, photo analysis and review run on Google Gemini. The planning documents (`PLAN.md`, `CLAUDE.md`, `PROGRESS.md`) are in the repo as they were used.
+I built EcoReno during the Banana Hacks 2026 event window (Oct 9–11) with Claude Code (Anthropic) as my coding assistant for planning, code, tests and review. Image editing, photo analysis and review run on Google Gemini. The planning documents (`PLAN.md`, `CLAUDE.md`, `PROGRESS.md`) and a session log (`docs/SESSION_LOG.md`) are in the repo as they were used.
