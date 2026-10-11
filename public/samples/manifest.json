@@ -1,0 +1,112 @@
+{
+  "samples": [
+    {
+      "featuredPlaces": [],
+      "results": {},
+      "id": "cape-cod",
+      "title": "Cape Cod with attached garage",
+      "photo": "/samples/cape-cod/photo.jpg",
+      "width": 1536,
+      "height": 1018,
+      "featured": true,
+      "credit": {
+        "name": "Roger Starnes Sr",
+        "url": "https://unsplash.com/@rstar50?utm_source=ecoreno_ai&utm_medium=referral",
+        "sourceUrl": "https://unsplash.com/photos/a-white-house-with-a-garage-driveway-and-green-lawn-L8SsHskRWIE?utm_source=ecoreno_ai&utm_medium=referral",
+        "source": "Unsplash",
+        "license": "Unsplash License"
+      },
+      "thumb": "/samples/cape-cod/thumb.jpg"
+    },
+    {
+      "featuredPlaces": [],
+      "results": {},
+      "id": "brick-ranch",
+      "title": "Brick ranch with shutters",
+      "photo": "/samples/brick-ranch/photo.jpg",
+      "width": 1536,
+      "height": 833,
+      "featured": true,
+      "credit": {
+        "name": "Roger Starnes Sr",
+        "url": "https://unsplash.com/@rstar50?utm_source=ecoreno_ai&utm_medium=referral",
+        "sourceUrl": "https://unsplash.com/photos/red-brick-house-with-white-shutters-Ny6ZtbducqU?utm_source=ecoreno_ai&utm_medium=referral",
+        "source": "Unsplash",
+        "license": "Unsplash License"
+      },
+      "thumb": "/samples/brick-ranch/thumb.jpg"
+    },
+    {
+      "featuredPlaces": [],
+      "results": {},
+      "id": "desert-home",
+      "title": "Desert-landscaped home (Arizona)",
+      "photo": "/samples/desert-home/photo.jpg",
+      "width": 1536,
+      "height": 970,
+      "featured": false,
+      "credit": {
+        "name": "Emma",
+        "url": "https://unsplash.com/@bloomingbee?utm_source=ecoreno_ai&utm_medium=referral",
+        "sourceUrl": "https://unsplash.com/photos/house-with-desert-landscaping-and-driveway-under-a-clear-sky-sIDHBJd84Co?utm_source=ecoreno_ai&utm_medium=referral",
+        "source": "Unsplash",
+        "license": "Unsplash License"
+      },
+      "thumb": "/samples/desert-home/thumb.jpg"
+    },
+    {
+      "featuredPlaces": [],
+      "results": {},
+      "id": "craftsman-bungalow",
+      "title": "Craftsman bungalow with porch",
+      "photo": "/samples/craftsman-bungalow/photo.jpg",
+      "width": 1536,
+      "height": 1018,
+      "featured": false,
+      "credit": {
+        "name": "Roger Starnes Sr",
+        "url": "https://unsplash.com/@rstar50?utm_source=ecoreno_ai&utm_medium=referral",
+        "sourceUrl": "https://unsplash.com/photos/a-quaint-house-with-a-well-maintained-lawn-and-garden-NbVN-I3h9VQ?utm_source=ecoreno_ai&utm_medium=referral",
+        "source": "Unsplash",
+        "license": "Unsplash License"
+      },
+      "thumb": "/samples/craftsman-bungalow/thumb.jpg"
+    },
+    {
+      "featuredPlaces": [],
+      "results": {},
+      "id": "split-level",
+      "title": "Split-level with lawn and trees",
+      "photo": "/samples/split-level/photo.jpg",
+      "width": 1536,
+      "height": 728,
+      "featured": false,
+      "credit": {
+        "name": "Roger Starnes Sr",
+        "url": "https://unsplash.com/@rstar50?utm_source=ecoreno_ai&utm_medium=referral",
+        "sourceUrl": "https://unsplash.com/photos/a-brown-split-level-house-with-a-green-lawn-and-trees-4IE-NmsIwsA?utm_source=ecoreno_ai&utm_medium=referral",
+        "source": "Unsplash",
+        "license": "Unsplash License"
+      },
+      "thumb": "/samples/split-level/thumb.jpg"
+    },
+    {
+      "featuredPlaces": [],
+      "results": {},
+      "id": "farmhouse",
+      "title": "Farmhouse with covered porch",
+      "photo": "/samples/farmhouse/photo.jpg",
+      "width": 1536,
+      "height": 1017,
+      "featured": false,
+      "credit": {
+        "name": "Roger Starnes Sr",
+        "url": "https://unsplash.com/@rstar50?utm_source=ecoreno_ai&utm_medium=referral",
+        "sourceUrl": "https://unsplash.com/photos/white-farmhouse-on-green-lawn-CxJ0PMpp8dI?utm_source=ecoreno_ai&utm_medium=referral",
+        "source": "Unsplash",
+        "license": "Unsplash License"
+      },
+      "thumb": "/samples/farmhouse/thumb.jpg"
+    }
+  ]
+}

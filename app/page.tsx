@@ -5,7 +5,7 @@ import { CityPicker } from "@/components/CityPicker";
 import { CompareView } from "@/components/CompareView";
 import { ClimateEvidence } from "@/components/ClimateEvidence";
 import { FeatureChips } from "@/components/FeatureChips";
-import { PhotoInput } from "@/components/PhotoInput";
+import { HouseSource } from "@/components/HouseSource";
 import { PipelineStepper } from "@/components/PipelineStepper";
 import { RecommendationList } from "@/components/RecommendationList";
 import { ResultView } from "@/components/ResultView";
@@ -18,7 +18,8 @@ import { readGenerateStream, type GenerateResult, type GenerateStage } from "@/l
 import type { Place } from "@/lib/geocode";
 import type { InterventionId } from "@/lib/interventions";
 import { recommend, type Priority } from "@/lib/recommendationEngine";
-import { loadSample, loadSampleResult, type LoadedSample } from "@/lib/samples";
+import { loadSample, loadSampleResult, type LoadedSample, type SampleManifestEntry } from "@/lib/samples";
+import type { PhotoCredit } from "@/lib/unsplash";
 import type { SiteProfile } from "@/lib/siteProfile";
 
 type Async<T> = { kind: "idle" } | { kind: "loading" } | { kind: "ready"; value: T } | { kind: "error"; message: string };
@@ -60,6 +61,7 @@ export default function Home() {
   const [gen, setGen] = useState<GenState>({ kind: "idle" });
   const [elapsed, setElapsed] = useState(0);
   const [sample, setSample] = useState<LoadedSample | null>(null);
+  const [photoCredit, setPhotoCredit] = useState<PhotoCredit | null>(null);
   const [sampleError, setSampleError] = useState<string | null>(null);
   const [resultNote, setResultNote] = useState<string | null>(null);
   const climateReq = useRef<AbortController | null>(null);
@@ -94,35 +96,32 @@ export default function Home() {
     setResultNote(null);
   }
 
-  async function trySample() {
+  async function trySample(entry: SampleManifestEntry) {
     setSampleError(null);
     try {
-      const s = await loadSample();
-      if (!s) {
-        setSampleError("The sample house isn't available yet.");
-        return;
-      }
-      analysisReq.current?.abort();
-      setSample(s);
-      setPhoto(s.photoData);
-      setAnalysis({ kind: "ready", value: s.inventoryData });
-      setConfirmed({});
-      resetDownstream();
-      if (s.featuredPlaces[0]) await selectPlace(s.featuredPlaces[0]);
+      const s = await loadSample(entry);
+      await choosePhoto(s.photoData, { credit: s.credit, sample: s });
+      // Featured samples come with a featured city so the instant result lines up; a city already chosen is kept.
+      if (!place && s.featuredPlaces[0]) await selectPlace(s.featuredPlaces[0]);
     } catch {
-      setSampleError("Couldn't load the sample house. Please try again.");
+      setSampleError("Couldn't load that sample home. Please try another.");
     }
   }
 
-  async function choosePhoto(next: PreparedPhoto | null) {
+  async function choosePhoto(next: PreparedPhoto | null, opts: { credit?: PhotoCredit | null; sample?: LoadedSample | null } = {}) {
     analysisReq.current?.abort();
-    setSample(null);
+    setSample(opts.sample ?? null);
+    setPhotoCredit(opts.credit ?? null);
     setPhoto(next);
     setConfirmed({});
     setManualFeatures(false);
     resetDownstream();
     if (!next) {
       setAnalysis({ kind: "idle" });
+      return;
+    }
+    if (opts.sample?.inventoryData) {
+      setAnalysis({ kind: "ready", value: opts.sample.inventoryData });
       return;
     }
     const controller = new AbortController();
@@ -195,35 +194,20 @@ export default function Home() {
         <p className="font-mono text-xs tracking-widest text-muted uppercase">EcoReno AI · concept tool</p>
         <h1 className="text-3xl font-semibold sm:text-4xl">See your house, redesigned for your climate.</h1>
         <p className="max-w-2xl text-muted">
-          Upload a photo of a house, pick any U.S. city, and get climate-appropriate exterior upgrades edited into the same photo, with ten years of local
-          climate evidence behind every change.
+          Pick a real house (or upload your own), choose any U.S. city, and get climate-appropriate exterior upgrades edited into that same photo, with ten
+          years of local climate evidence behind every change.
         </p>
       </header>
 
       <Step n="01" title="Your house">
-        <PhotoInput
+        <HouseSource
           photo={photo}
-          onPhoto={choosePhoto}
-          extraAction={
-            <button type="button" onClick={trySample} className="min-h-11 rounded-control border border-line bg-surface px-4 text-sm font-medium">
-              Try a sample house
-            </button>
-          }
-          caption={
-            <>
-              {sample && (
-                <p className="text-xs text-muted">
-                  Sample photo by{" "}
-                  <a href={sample.credit.url} className="underline" target="_blank" rel="noreferrer">
-                    {sample.credit.name}
-                  </a>{" "}
-                  ({sample.credit.license}).
-                </p>
-              )}
-              {sampleError && <p className="text-sm text-danger">{sampleError}</p>}
-            </>
-          }
+          credit={photoCredit}
+          onUpload={(p) => choosePhoto(p)}
+          onPicked={(p, credit) => choosePhoto(p, { credit })}
+          onSample={trySample}
         />
+        {sampleError && <p className="text-sm text-danger">{sampleError}</p>}
         {analysis.kind === "loading" && (
           <p aria-live="polite" className="text-sm text-muted">
             Checking what&apos;s visible in the photo…

@@ -8,6 +8,9 @@ import { getRedis } from "./redis";
 export const LIMITS = {
   generate: { perVisitor: { max: 5, windowSec: 3600 }, globalDaily: 150 },
   analyze: { perVisitor: { max: 20, windowSec: 3600 }, globalDaily: 600 },
+  // Unsplash's demo tier allows 50 requests/hour for the whole app; searches are cached for a day.
+  photoSearch: { perVisitor: { max: 20, windowSec: 3600 }, globalDaily: 600 },
+  photoSelect: { perVisitor: { max: 15, windowSec: 3600 }, globalDaily: 400 },
 } as const;
 
 type Bucket = { count: number; resetAt: number };

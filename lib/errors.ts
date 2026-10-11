@@ -10,7 +10,8 @@ export type ErrorCode =
   | "EDIT_FAILED"
   | "REVIEW_FAILED"
   | "RATE_LIMITED"
-  | "VALUE_UNAVAILABLE";
+  | "VALUE_UNAVAILABLE"
+  | "PHOTO_SEARCH_UNAVAILABLE";
 
 export class AppError extends Error {
   constructor(

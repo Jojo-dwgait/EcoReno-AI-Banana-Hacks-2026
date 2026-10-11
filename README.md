@@ -1,6 +1,6 @@
 # EcoReno AI
 
-Upload a photo of a house, pick any U.S. city, and EcoReno edits that same photo with exterior upgrades suited to the city's climate. Every change on the image links back to the ten years of weather data that justified it, and the app checks its own edit before showing it to you.
+Pick a real house (search free-licensed photos, choose a sample home, or upload your own), pick any U.S. city, and EcoReno edits that same photo with exterior upgrades suited to the city's climate. Every change on the image links back to the ten years of weather data that justified it, and the app checks its own edit before showing it to you.
 
 Built solo for Banana Hacks 2026 (image AI track). Live demo: _link added at deployment_.
 
@@ -64,6 +64,7 @@ npm run dev                  # http://localhost:3000
 |---|---|
 | `GEMINI_API_KEY` | Photo analysis, image edits, and review ([Google AI Studio](https://aistudio.google.com/apikey)) |
 | `CENSUS_API_KEY` | The home-value panel ([free signup](https://api.census.gov/data/key_signup.html)) |
+| `UNSPLASH_ACCESS_KEY` | Live house-photo search ([free developer app](https://unsplash.com/developers)) |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Shared cache and rate limits in production (optional locally) |
 
 City search and climate data need no keys.
@@ -91,7 +92,7 @@ npx tsx --conditions=react-server scripts/spike-edit.mts photos/house.jpg   # on
 
 ## Data, licenses and credits
 
-Weather data: [Open-Meteo](https://open-meteo.com/) Historical Weather API (CC BY 4.0), built on ERA5 and ERA5-Land reanalysis from the Copernicus Climate Change Service. Geography and housing data: U.S. Census Bureau (Geocoder, ACS PUMS, table B25077). Value studies: [Lawrence Berkeley National Laboratory](https://newscenter.lbl.gov/?p=33444), [USDA Forest Service](https://fs.usda.gov/pnw/sciencef/scifi126.pdf), [Henry 1994](https://jeh.kglmeridian.com/view/journals/jenh/12/2/article-p65.xml). Next-step links point to EPA WaterSense, EPA Soak Up the Rain, DOE and DSIRE. The sample photo's credit appears in the app.
+Weather data: [Open-Meteo](https://open-meteo.com/) Historical Weather API (CC BY 4.0), built on ERA5 and ERA5-Land reanalysis from the Copernicus Climate Change Service. Geography and housing data: U.S. Census Bureau (Geocoder, ACS PUMS, table B25077). Value studies: [Lawrence Berkeley National Laboratory](https://newscenter.lbl.gov/?p=33444), [USDA Forest Service](https://fs.usda.gov/pnw/sciencef/scifi126.pdf), [Henry 1994](https://jeh.kglmeridian.com/view/journals/jenh/12/2/article-p65.xml). Next-step links point to EPA WaterSense, EPA Soak Up the Rain, DOE and DSIRE. House photos for search and the sample gallery come from [Unsplash](https://unsplash.com/?utm_source=ecoreno_ai&utm_medium=referral) under the Unsplash License, credited to each photographer in the app. Listing sites like Zillow aren't used: they offer no public API, scraping breaks their terms, and listing photos are copyrighted.
 
 ## How this was built
 

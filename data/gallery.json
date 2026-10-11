@@ -1,0 +1,56 @@
+[
+  {
+    "slug": "cape-cod",
+    "title": "Cape Cod with attached garage",
+    "unsplashId": "L8SsHskRWIE",
+    "photographer": "Roger Starnes Sr",
+    "photographerUrl": "https://unsplash.com/@rstar50",
+    "pageUrl": "https://unsplash.com/photos/a-white-house-with-a-garage-driveway-and-green-lawn-L8SsHskRWIE",
+    "featured": true
+  },
+  {
+    "slug": "brick-ranch",
+    "title": "Brick ranch with shutters",
+    "unsplashId": "Ny6ZtbducqU",
+    "photographer": "Roger Starnes Sr",
+    "photographerUrl": "https://unsplash.com/@rstar50",
+    "pageUrl": "https://unsplash.com/photos/red-brick-house-with-white-shutters-Ny6ZtbducqU",
+    "featured": true
+  },
+  {
+    "slug": "desert-home",
+    "title": "Desert-landscaped home (Arizona)",
+    "unsplashId": "sIDHBJd84Co",
+    "photographer": "Emma",
+    "photographerUrl": "https://unsplash.com/@bloomingbee",
+    "pageUrl": "https://unsplash.com/photos/house-with-desert-landscaping-and-driveway-under-a-clear-sky-sIDHBJd84Co",
+    "featured": false
+  },
+  {
+    "slug": "craftsman-bungalow",
+    "title": "Craftsman bungalow with porch",
+    "unsplashId": "NbVN-I3h9VQ",
+    "photographer": "Roger Starnes Sr",
+    "photographerUrl": "https://unsplash.com/@rstar50",
+    "pageUrl": "https://unsplash.com/photos/a-quaint-house-with-a-well-maintained-lawn-and-garden-NbVN-I3h9VQ",
+    "featured": false
+  },
+  {
+    "slug": "split-level",
+    "title": "Split-level with lawn and trees",
+    "unsplashId": "4IE-NmsIwsA",
+    "photographer": "Roger Starnes Sr",
+    "photographerUrl": "https://unsplash.com/@rstar50",
+    "pageUrl": "https://unsplash.com/photos/a-brown-split-level-house-with-a-green-lawn-and-trees-4IE-NmsIwsA",
+    "featured": false
+  },
+  {
+    "slug": "farmhouse",
+    "title": "Farmhouse with covered porch",
+    "unsplashId": "CxJ0PMpp8dI",
+    "photographer": "Roger Starnes Sr",
+    "photographerUrl": "https://unsplash.com/@rstar50",
+    "pageUrl": "https://unsplash.com/photos/white-farmhouse-on-green-lawn-CxJ0PMpp8dI",
+    "featured": false
+  }
+]

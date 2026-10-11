@@ -442,6 +442,7 @@ Each milestone ends with tests passing and a commit. Times are PDT.
 | Live link | Open with limits; cached sample house |
 | Look | Photo-first markup + field-report change log |
 | Platform (Oct 10) | Desktop web app only; no mobile-specific work |
+| House photos (Oct 10) | Main path: live search of free-licensed photos (Unsplash API, hotlinked, download endpoint, credited). Sample homes: 6 curated Unsplash houses (2 featured with instant results). Upload stays. No Zillow/listings (no API, ToS, copyright, privacy) |
 
 ## 16. Inputs and accounts (yours)
 | When | Item |
