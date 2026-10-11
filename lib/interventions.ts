@@ -47,6 +47,8 @@ const fmt = (p: SiteProfile, k: MetricKey, u: UnitSystem) => {
   const f = formatMetric(p.climate.metrics[k], u);
   return `${f.value} ${f.unit}`;
 };
+/** Just the number, for counts that read better in a sentence ("8 dry months a year"). */
+const num = (p: SiteProfile, k: MetricKey) => formatMetric(p.climate.metrics[k], "us").value;
 /** Gridded data under-counts coastal hot days (e.g. Miami), so heat relevance uses the stronger of hot days and cooling degree days. */
 const heatSignal = (p: SiteProfile) => Math.max(ramp(val(p, "hotDays"), 10, 120), ramp(val(p, "coolingDegreeDaysF"), 500, 3000));
 
@@ -62,7 +64,7 @@ export const INTERVENTIONS: Intervention[] = [
     relevance: (p) => 0.7 * ramp(val(p, "waterDeficitMm"), 0, 800) + 0.3 * ramp(val(p, "dryMonths"), 0, 6),
     evidence: ["waterDeficitMm", "dryMonths", "annualPrecipMm", "annualEt0Mm"],
     explain: (p, u) =>
-      `Plants here demand about ${fmt(p, "waterDeficitMm", u)} more water than falls as rain (evapotranspiration ${fmt(p, "annualEt0Mm", u)} vs. ${fmt(p, "annualPrecipMm", u)} of precipitation), with ${fmt(p, "dryMonths", u)} dry. Swapping thirsty turf for ${plantingPalette(p).summary} can reduce irrigation needs.`,
+      `Plants here demand about ${fmt(p, "waterDeficitMm", u)} more water than falls as rain (evapotranspiration ${fmt(p, "annualEt0Mm", u)} vs. ${fmt(p, "annualPrecipMm", u)} of precipitation), and ${num(p, "dryMonths")} months a year are dry. Swapping thirsty turf for ${plantingPalette(p).summary} can reduce irrigation needs.`,
     instruction: (p) => ({
       instruction: "Replace the mowed lawn with planting beds, keeping the lawn's exact outline and edges.",
       styleDescriptors: [...plantingPalette(p).descriptors, "plants at realistic young-to-mature sizes"],
@@ -99,7 +101,7 @@ export const INTERVENTIONS: Intervention[] = [
     relevance: (p) => ramp(val(p, "coolingDegreeDaysF"), 500, 3000),
     evidence: ["coolingDegreeDaysF", "hotDays"],
     explain: (p, u) =>
-      `${fmt(p, "coolingDegreeDaysF", u)} of cooling demand and ${fmt(p, "hotDays", u)} at 90 °F or hotter. A lighter, reflective roof absorbs less sun.`,
+      `${fmt(p, "coolingDegreeDaysF", u)} of cooling demand and ${num(p, "hotDays")} days a year at 90 °F or hotter. A lighter, reflective roof absorbs less sun.`,
     instruction: () => ({
       instruction: "Change the roof covering to a lighter, sun-reflective color in the same roofing material and pattern.",
       styleDescriptors: ["light gray or off-white reflective finish", "same roof shape, pitch, and edges"],
@@ -117,7 +119,7 @@ export const INTERVENTIONS: Intervention[] = [
     relevance: heatSignal,
     evidence: ["hotDays", "coolingDegreeDaysF"],
     explain: (p, u) =>
-      `${fmt(p, "hotDays", u)} reach 90 °F and the site logs ${fmt(p, "coolingDegreeDaysF", u)} of cooling demand. A ${shadeTreeStyle(p).summary} can shade walls and windows.`,
+      `${num(p, "hotDays")} days a year reach 90 °F, and the site logs ${fmt(p, "coolingDegreeDaysF", u)} of cooling demand. A ${shadeTreeStyle(p).summary} can shade walls and windows.`,
     instruction: (p) => ({
       instruction: "Plant one young shade tree in the open yard, offset from the entry and walkway so it never blocks the door.",
       styleDescriptors: [shadeTreeStyle(p).descriptor, "realistic size for a recently planted tree", "a mulch ring at its base"],
@@ -135,7 +137,7 @@ export const INTERVENTIONS: Intervention[] = [
     relevance: (p) => 0.6 * heatSignal(p) + 0.4 * ramp(val(p, "solarKwhM2Day"), 3.5, 5.5),
     evidence: ["hotDays", "solarKwhM2Day"],
     explain: (p, u) =>
-      `Strong sun (${fmt(p, "solarKwhM2Day", u)}) and ${fmt(p, "hotDays", u)} at 90 °F or hotter. Awnings block direct sun before it reaches the glass.`,
+      `Strong sun (${fmt(p, "solarKwhM2Day", u)}) and ${num(p, "hotDays")} days a year at 90 °F or hotter. Awnings block direct sun before it reaches the glass.`,
     instruction: () => ({
       instruction: "Add simple fabric awnings directly above the front-facing windows.",
       styleDescriptors: ["muted neutral fabric that matches the house colors", "modest projection"],
@@ -153,7 +155,7 @@ export const INTERVENTIONS: Intervention[] = [
     relevance: (p) => 0.7 * ramp(val(p, "heavyRainDays"), 2, 12) + 0.3 * ramp(val(p, "annualPrecipMm"), 300, 1300),
     evidence: ["heavyRainDays", "annualPrecipMm"],
     explain: (p, u) =>
-      `${fmt(p, "heavyRainDays", u)} bring 1 inch or more of rain, out of ${fmt(p, "annualPrecipMm", u)} in total. A rain garden gives roof runoff a place to soak in. This is rainfall context, not a flood-risk rating.`,
+      `${num(p, "heavyRainDays")} days a year bring 1 inch or more of rain, out of ${fmt(p, "annualPrecipMm", u)} in total. A rain garden gives roof runoff a place to soak in. This is rainfall context, not a flood-risk rating.`,
     instruction: () => ({
       instruction: "Add a small rain garden: a shallow planted depression in the yard that receives water from the nearest downspout.",
       styleDescriptors: ["moisture-tolerant native plants", "river rock where the water enters", "kept well away from the house foundation"],
@@ -170,7 +172,7 @@ export const INTERVENTIONS: Intervention[] = [
     gate: ({ has }) => (has("paving") ? null : "No driveway or paving visible in the photo."),
     relevance: (p) => ramp(val(p, "heavyRainDays"), 2, 12),
     evidence: ["heavyRainDays"],
-    explain: (p, u) => `${fmt(p, "heavyRainDays", u)} with 1 inch or more of rain. Permeable pavers let some of that runoff soak in instead of running to the street.`,
+    explain: (p) => `${num(p, "heavyRainDays")} days a year bring 1 inch or more of rain. Permeable pavers let some of that runoff soak in instead of running to the street.`,
     instruction: () => ({
       instruction: "Resurface the existing driveway with permeable interlocking pavers, keeping its exact footprint and edges.",
       styleDescriptors: ["gravel-filled joints", "a color close to the existing paving"],
@@ -187,7 +189,7 @@ export const INTERVENTIONS: Intervention[] = [
     gate: ({ has }) => (has("downspout") || has("wall") ? null : "No downspout or wall area visible for a barrel."),
     relevance: (p) => 0.5 * ramp(val(p, "dryMonths"), 1, 6) + 0.5 * ramp(val(p, "annualPrecipMm"), 200, 800),
     evidence: ["dryMonths", "annualPrecipMm"],
-    explain: (p, u) => `${fmt(p, "annualPrecipMm", u)} of precipitation, with ${fmt(p, "dryMonths", u)} dry. A rain barrel stores roof runoff from wet periods for watering in dry ones.`,
+    explain: (p, u) => `${fmt(p, "annualPrecipMm", u)} of precipitation, and ${num(p, "dryMonths")} months a year are dry. A rain barrel stores roof runoff from wet periods for watering in dry ones.`,
     instruction: () => ({
       instruction: "Add one rain barrel connected to a downspout at a corner of the house.",
       styleDescriptors: ["dark green or brown barrel on a low stand", "neatly connected to the downspout"],
@@ -206,7 +208,7 @@ export const INTERVENTIONS: Intervention[] = [
     relevance: (p) => 0.6 * ramp(val(p, "heatingDegreeDaysF"), 2000, 8000) + 0.4 * ramp(val(p, "freezeDays"), 20, 150),
     evidence: ["heatingDegreeDaysF", "freezeDays"],
     explain: (p, u) =>
-      `${fmt(p, "heatingDegreeDaysF", u)} of heating demand and ${fmt(p, "freezeDays", u)} at or below freezing. An evergreen row on the windward side can cut winter wind against the house.`,
+      `${fmt(p, "heatingDegreeDaysF", u)} of heating demand and ${num(p, "freezeDays")} freezing nights a year. An evergreen row on the windward side can cut winter wind against the house.`,
     instruction: () => ({
       instruction: "Add a row of young evergreen shrubs or small trees along the side edge of the yard, away from the entry and front windows.",
       styleDescriptors: ["dense evergreen foliage", "realistic young plant sizes"],

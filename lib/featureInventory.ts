@@ -49,3 +49,19 @@ export function isPresent(inv: FeatureInventory, key: FeatureKey, confirmed?: Pa
   const f = inv.features[key];
   return f.visible && f.confidence >= 0.5;
 }
+
+/** Fallback when photo analysis is unavailable: nothing assumed, the user marks what's visible. */
+export function manualInventory(): FeatureInventory {
+  const features = Object.fromEntries(FEATURE_KEYS.map((k) => [k, { visible: false, confidence: 0, box: null, note: "" }])) as FeatureInventory["features"];
+  return {
+    isResidentialExterior: true,
+    rejectionReason: null,
+    propertyType: "unknown",
+    stories: null,
+    roofFacesCamera: false,
+    peopleVisible: false,
+    features,
+    scene: { lighting: "", weather: "", season: "", condition: "" },
+    uncertainties: [],
+  };
+}

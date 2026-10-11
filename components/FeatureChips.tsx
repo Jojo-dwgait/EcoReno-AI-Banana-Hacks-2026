@@ -13,7 +13,9 @@ export function FeatureChips({ inventory, confirmed, onConfirm }: Props) {
   return (
     <div className="space-y-2">
       <p className="text-sm text-muted">
-        Detected in your photo. These are the AI&apos;s best guesses, not an inspection. Tap to correct anything it got wrong.
+        {inventory.features.roof.confidence === 0 && Object.values(inventory.features).every((f) => f.confidence === 0)
+          ? "Select everything that's visible in your photo."
+          : "Detected in your photo. These are the AI's best guesses, not an inspection. Click to correct anything it got wrong."}
       </p>
       <ul className="flex flex-wrap gap-2">
         {FEATURE_KEYS.map((k) => {
@@ -30,7 +32,7 @@ export function FeatureChips({ inventory, confirmed, onConfirm }: Props) {
                 className={`min-h-11 rounded-control border px-3 text-sm ${present ? "border-ink bg-ink text-paper" : "border-line bg-surface text-muted line-through"}`}
               >
                 {FEATURE_LABELS[k]}
-                <span className="ml-2 font-mono text-xs opacity-80">{corrected ? "you set" : `${Math.round(f.confidence * 100)}%`}</span>
+                <span className="ml-2 font-mono text-xs opacity-80">{corrected ? "you set" : f.confidence === 0 ? "" : `${Math.round(f.confidence * 100)}%`}</span>
               </button>
             </li>
           );

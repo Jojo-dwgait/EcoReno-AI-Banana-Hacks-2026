@@ -12,7 +12,7 @@ import { ResultView } from "@/components/ResultView";
 import { ValuePanel } from "@/components/ValuePanel";
 import type { PreparedPhoto } from "@/lib/clientImage";
 import { MAX_CHANGES } from "@/lib/editPlan";
-import type { FeatureInventory, FeatureKey } from "@/lib/featureInventory";
+import { manualInventory, type FeatureInventory, type FeatureKey } from "@/lib/featureInventory";
 import type { UnitSystem } from "@/lib/format";
 import { readGenerateStream, type GenerateResult, type GenerateStage } from "@/lib/generateTypes";
 import type { Place } from "@/lib/geocode";
@@ -64,8 +64,16 @@ export default function Home() {
   const climateReq = useRef<AbortController | null>(null);
   const analysisReq = useRef<AbortController | null>(null);
 
+  const [manualFeatures, setManualFeatures] = useState(false);
   const profile = climate.kind === "ready" ? climate.value : null;
-  const inventory = analysis.kind === "ready" ? analysis.value : null;
+  const hasPhoto = photo !== null;
+  const markedRoof = !!confirmed.roof;
+  const inventory = useMemo<FeatureInventory | null>(() => {
+    if (analysis.kind === "ready") return analysis.value;
+    // Manual mode: a roof the user marks is assumed to face the camera (they can see it in their own photo).
+    if (manualFeatures && hasPhoto) return { ...manualInventory(), roofFacesCamera: markedRoof };
+    return null;
+  }, [analysis, manualFeatures, hasPhoto, markedRoof]);
 
   const recs = useMemo(
     () => (profile && inventory ? recommend({ profile, inventory, priority, confirmed }) : null),
@@ -110,6 +118,7 @@ export default function Home() {
     setSample(null);
     setPhoto(next);
     setConfirmed({});
+    setManualFeatures(false);
     resetDownstream();
     if (!next) {
       setAnalysis({ kind: "idle" });
@@ -220,9 +229,14 @@ export default function Home() {
           </p>
         )}
         {analysis.kind === "error" && (
-          <p role="alert" className="text-sm text-danger">
-            {analysis.message}
-          </p>
+          <div role="alert" className="space-y-2 text-sm">
+            <p className="text-danger">Automatic photo analysis isn&apos;t available right now: {analysis.message}</p>
+            {!manualFeatures && (
+              <button type="button" onClick={() => setManualFeatures(true)} className="min-h-11 rounded-control border border-line bg-surface px-4 font-medium">
+                Mark what&apos;s in my photo instead
+              </button>
+            )}
+          </div>
         )}
         {inventory && <FeatureChips inventory={inventory} confirmed={confirmed} onConfirm={(k, v) => { setConfirmed((c) => ({ ...c, [k]: v })); setSelectedOverride(null); }} />}
       </Step>
