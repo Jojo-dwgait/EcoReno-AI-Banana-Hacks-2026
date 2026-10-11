@@ -7,6 +7,7 @@ import type { FeatureInventory } from "@/lib/featureInventory";
 import { formatMetric, type UnitSystem } from "@/lib/format";
 import type { GenerateResult } from "@/lib/generateTypes";
 import { INTERVENTION_BY_ID } from "@/lib/interventions";
+import { nextStepsFor } from "@/lib/nextSteps";
 import type { SiteProfile } from "@/lib/siteProfile";
 
 type Props = {
@@ -185,6 +186,22 @@ export function ResultView({ original, result, profile, inventory, units, note }
                 </dd>
                 <dt className="text-muted">Keep in mind</dt>
                 <dd className="text-muted">{iv.caveat}</dd>
+                <dt className="text-muted">Next steps</dt>
+                <dd>
+                  <ul className="space-y-0.5">
+                    {nextStepsFor(c.id, profile.place.stateCode).map((step) => (
+                      <li key={step.label}>
+                        {step.url ? (
+                          <a href={step.url} target="_blank" rel="noreferrer" className="underline">
+                            {step.label}
+                          </a>
+                        ) : (
+                          <span className="text-muted">{step.label}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
                 {st?.note && (
                   <>
                     <dt className="text-muted">Reviewer note</dt>
