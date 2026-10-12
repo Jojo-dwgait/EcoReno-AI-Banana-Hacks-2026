@@ -1,0 +1,177 @@
+{
+  "type": "result",
+  "image": "/samples/cape-cod/results/5359777-native-planting_rooftop-solar_shade-awnings.jpg",
+  "width": 1536,
+  "height": 1018,
+  "review": {
+    "perChange": [
+      {
+        "id": "native-planting",
+        "status": "visible",
+        "note": "Lawn replaced with gravel mulch and rounded shrubs."
+      },
+      {
+        "id": "rooftop-solar",
+        "status": "visible",
+        "note": "Solar panel arrays added flush to the main front roof."
+      },
+      {
+        "id": "shade-awnings",
+        "status": "partial",
+        "note": "Awnings added to ground-floor windows but missing on dormers."
+      }
+    ],
+    "perPreserve": [
+      {
+        "item": "the exact building geometry, roofline, and roof shape",
+        "kept": true,
+        "note": "Main structure and rooflines remain unchanged."
+      },
+      {
+        "item": "every window and door: position, size, and style",
+        "kept": true,
+        "note": "Openings and door styles match original."
+      },
+      {
+        "item": "the driveway and walkway footprints and materials, unless a change below targets them",
+        "kept": true,
+        "note": "Driveway footprint preserved."
+      },
+      {
+        "item": "the camera angle, framing, and perspective",
+        "kept": true,
+        "note": "Perspective and framing are identical."
+      },
+      {
+        "item": "the lighting direction, time of day, and shadows",
+        "kept": true,
+        "note": "Sunlight angle and shadows consistent."
+      },
+      {
+        "item": "the current weather and sky",
+        "kept": true,
+        "note": "Clear sky and ambient conditions maintained."
+      },
+      {
+        "item": "the visible age, dirt, and wear of the house",
+        "kept": true,
+        "note": "House exterior appearance remains consistent."
+      },
+      {
+        "item": "neighboring houses, cars, fences, and street",
+        "kept": true,
+        "note": "Surroundings remain unchanged."
+      },
+      {
+        "item": "vegetation outside the target areas",
+        "kept": true,
+        "note": "Background trees preserved."
+      },
+      {
+        "item": "the lighting as photographed: \"bright daylight with direct sunlight and soft tree shadows\"",
+        "kept": true,
+        "note": "Daylight lighting unchanged."
+      },
+      {
+        "item": "the weather and sky as photographed: \"clear\"",
+        "kept": true,
+        "note": "Weather preserved."
+      },
+      {
+        "item": "the season as photographed: \"summer\"",
+        "kept": true,
+        "note": "Summer foliage preserved."
+      },
+      {
+        "item": "the house's visible condition: \"fair, with minor wear and cracks on the driveway\"",
+        "kept": true,
+        "note": "General condition maintained."
+      }
+    ],
+    "unrequestedChanges": [
+      "Foreground lawn on the left side of driveway also replaced with gravel and shrubs."
+    ],
+    "sameScene": true,
+    "altText": "Front view of a home with new rooftop solar panels, fabric window awnings, and gravel landscaping replacing the lawn."
+  },
+  "verdict": "flag",
+  "attempts": [
+    {
+      "attempt": 1,
+      "editMs": 0,
+      "reviewMs": 14020,
+      "model": "FLUX.1-Kontext-dev",
+      "verdict": "flag",
+      "aspectMismatch": 0
+    }
+  ],
+  "plan": {
+    "changes": [
+      {
+        "id": "native-planting",
+        "instruction": "Replace the mowed lawn with planting beds, keeping the lawn's exact outline and edges.",
+        "targetArea": "\"front lawn on the right side of the driveway\"",
+        "styleDescriptors": [
+          "drought-tolerant native shrubs and ornamental grasses",
+          "gravel mulch between plants",
+          "a few low boulders",
+          "plants at realistic young-to-mature sizes"
+        ]
+      },
+      {
+        "id": "rooftop-solar",
+        "instruction": "Add a tidy array of dark solar panels flush-mounted on the roof plane that faces the camera.",
+        "targetArea": "\"main pitched roof with dormers facing front\"",
+        "styleDescriptors": [
+          "black-framed panels in neat rows",
+          "setbacks from the roof edges and ridge"
+        ]
+      },
+      {
+        "id": "shade-awnings",
+        "instruction": "Add simple fabric awnings directly above the front-facing windows.",
+        "targetArea": "\"windows on the dormers and main ground level facade\"",
+        "styleDescriptors": [
+          "muted neutral fabric that matches the house colors",
+          "modest projection"
+        ]
+      }
+    ],
+    "preserve": [
+      "the exact building geometry, roofline, and roof shape",
+      "every window and door: position, size, and style",
+      "the driveway and walkway footprints and materials, unless a change below targets them",
+      "the camera angle, framing, and perspective",
+      "the lighting direction, time of day, and shadows",
+      "the current weather and sky",
+      "the visible age, dirt, and wear of the house",
+      "neighboring houses, cars, fences, and street",
+      "vegetation outside the target areas",
+      "the lighting as photographed: \"bright daylight with direct sunlight and soft tree shadows\"",
+      "the weather and sky as photographed: \"clear\"",
+      "the season as photographed: \"summer\"",
+      "the house's visible condition: \"fair, with minor wear and cracks on the driveway\""
+    ],
+    "forbidden": [
+      "repainting or re-siding the house",
+      "adding new buildings, rooms, fences, or structures",
+      "turning planted or grass areas into new concrete or paving",
+      "changing the sky, season, or weather",
+      "adding people, animals, vehicles, text, or logos",
+      "making the house look newly built or staged"
+    ],
+    "climateBasis": [
+      "waterDeficitMm",
+      "dryMonths",
+      "annualPrecipMm",
+      "annualEt0Mm",
+      "solarKwhM2Day",
+      "hotDays"
+    ]
+  },
+  "prompt": "Edit this photo of a house. Replace the mowed lawn with planting beds, keeping the lawn's exact outline and edges. Use drought-tolerant native shrubs and ornamental grasses, gravel mulch between plants, a few low boulders. Only change front lawn on the right side of the driveway. Add a tidy array of dark solar panels flush-mounted on the roof plane that faces the camera. Use black-framed panels in neat rows, setbacks from the roof edges and ridge. Only change main pitched roof with dormers facing front. Add simple fabric awnings directly above the front-facing windows. Use muted neutral fabric that matches the house colors, modest projection. Only change windows on the dormers and main ground level facade. Keep the house's shape, roofline, siding, windows and doors; the driveway and walkways exactly as they are, including any cracks, stains and weeds; existing objects such as lamp posts, planters, mailboxes and utility poles; the trees, sky, lighting, shadows and season; the same camera position and framing. Keep the existing wear (fair, with minor wear and cracks on the driveway). Photorealistic; no new buildings, people, text or cars; don't tidy or renovate anything else.",
+  "models": {
+    "edit": "FLUX.1-Kontext-dev",
+    "review": "gemini-3.8-flash"
+  }
+}

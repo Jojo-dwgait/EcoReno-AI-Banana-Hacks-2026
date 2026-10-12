@@ -1,8 +1,27 @@
 {
   "samples": [
     {
-      "featuredPlaces": [],
-      "results": {},
+      "featuredPlaces": [
+        {
+          "id": 5359777,
+          "name": "Irvine",
+          "state": "California",
+          "stateCode": "CA",
+          "county": "Orange",
+          "lat": 33.66946,
+          "lon": -117.82311,
+          "timezone": "America/Los_Angeles",
+          "population": 256927,
+          "elevationM": 17,
+          "label": "Irvine, CA"
+        }
+      ],
+      "results": {
+        "5359777|native-planting,rooftop-solar,shade-awnings": {
+          "path": "/samples/cape-cod/results/5359777-native-planting_rooftop-solar_shade-awnings.json",
+          "generatedAt": "2026-10-12T00:22:35.809Z"
+        }
+      },
       "id": "cape-cod",
       "title": "Cape Cod with attached garage",
       "photo": "/samples/cape-cod/photo.jpg",
@@ -16,7 +35,8 @@
         "source": "Unsplash",
         "license": "Unsplash License"
       },
-      "thumb": "/samples/cape-cod/thumb.jpg"
+      "thumb": "/samples/cape-cod/thumb.jpg",
+      "inventory": "/samples/cape-cod/inventory.json"
     },
     {
       "featuredPlaces": [],

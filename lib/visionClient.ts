@@ -68,7 +68,7 @@ Return:
 - sameScene: false if image 2 looks like a different house, angle, or photo rather than an edit of image 1.
 - altText: one sentence (max 200 characters) describing image 2 for a screen-reader user, mentioning the visible changes.`;
 
-const FALLBACK_VISION_MODEL = process.env.GEMINI_VISION_FALLBACK_MODEL || "gemini-2.5-flash";
+const FALLBACK_VISION_MODEL = process.env.GEMINI_VISION_FALLBACK_MODEL || "gemini-flash-lite-latest";
 
 /** One retry for transient failures (5xx, overload), switching to a fallback vision model. Quota errors are not retried. */
 async function withVisionRetry<T>(call: (model: string) => Promise<T>): Promise<T> {

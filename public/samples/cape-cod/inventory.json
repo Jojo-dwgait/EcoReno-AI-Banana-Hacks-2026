@@ -1,0 +1,94 @@
+{
+  "isResidentialExterior": true,
+  "rejectionReason": null,
+  "propertyType": "single_family",
+  "stories": 1,
+  "roofFacesCamera": true,
+  "peopleVisible": false,
+  "features": {
+    "roof": {
+      "visible": true,
+      "confidence": 0.98,
+      "box": {
+        "x": 0.378,
+        "y": 0.267,
+        "w": 0.546,
+        "h": 0.239
+      },
+      "note": "main pitched roof with dormers facing front"
+    },
+    "lawn": {
+      "visible": true,
+      "confidence": 0.95,
+      "box": {
+        "x": 0.465,
+        "y": 0.678,
+        "w": 0.532,
+        "h": 0.22999999999999998
+      },
+      "note": "front lawn on the right side of the driveway"
+    },
+    "paving": {
+      "visible": true,
+      "confidence": 0.95,
+      "box": {
+        "x": 0,
+        "y": 0.722,
+        "w": 0.957,
+        "h": 0.275
+      },
+      "note": "asphalt driveway leading to the garage"
+    },
+    "windows": {
+      "visible": true,
+      "confidence": 0.95,
+      "box": {
+        "x": 0.466,
+        "y": 0.318,
+        "w": 0.39099999999999996,
+        "h": 0.321
+      },
+      "note": "windows on the dormers and main ground level facade"
+    },
+    "downspout": {
+      "visible": true,
+      "confidence": 0.85,
+      "box": {
+        "x": 0.078,
+        "y": 0.504,
+        "w": 0.021000000000000005,
+        "h": 0.20499999999999996
+      },
+      "note": "vertical downspout pipe at the far left garage corner"
+    },
+    "openYard": {
+      "visible": true,
+      "confidence": 0.95,
+      "box": {
+        "x": 0.467,
+        "y": 0.679,
+        "w": 0.53,
+        "h": 0.237
+      },
+      "note": "spacious front yard grass area to the right"
+    },
+    "wall": {
+      "visible": true,
+      "confidence": 0.96,
+      "box": {
+        "x": 0.452,
+        "y": 0.486,
+        "w": 0.465,
+        "h": 0.17700000000000005
+      },
+      "note": "horizontal white siding on the main house facade"
+    }
+  },
+  "scene": {
+    "lighting": "bright daylight with direct sunlight and soft tree shadows",
+    "weather": "clear",
+    "season": "summer",
+    "condition": "fair, with minor wear and cracks on the driveway"
+  },
+  "uncertainties": []
+}
