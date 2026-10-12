@@ -11,7 +11,7 @@ export const GEMINI_MODELS = {
 let client: GoogleGenAI | null = null;
 
 export function geminiClient(): GoogleGenAI {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) throw new AppError("EDIT_FAILED", "Image AI isn't configured on this server yet.", 503);
   client ??= new GoogleGenAI({ apiKey });
   return client;

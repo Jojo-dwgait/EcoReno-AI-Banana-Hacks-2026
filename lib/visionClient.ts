@@ -68,12 +68,26 @@ Return:
 - sameScene: false if image 2 looks like a different house, angle, or photo rather than an edit of image 1.
 - altText: one sentence (max 200 characters) describing image 2 for a screen-reader user, mentioning the visible changes.`;
 
+const FALLBACK_VISION_MODEL = process.env.GEMINI_VISION_FALLBACK_MODEL || "gemini-2.5-flash";
+
+/** One retry for transient failures (5xx, overload), switching to a fallback vision model. Quota errors are not retried. */
+async function withVisionRetry<T>(call: (model: string) => Promise<T>): Promise<T> {
+  try {
+    return await call(GEMINI_MODELS.vision);
+  } catch (err) {
+    const status = (err as { status?: number })?.status ?? 0;
+    if (status < 500 && status !== 0) throw err;
+    await new Promise((r) => setTimeout(r, 1500));
+    return call(FALLBACK_VISION_MODEL);
+  }
+}
+
 export async function reviewEdit(original: ImageInput, edited: ImageInput, plan: EditPlan): Promise<{ review: ReviewResult; model: string; ms: number }> {
   const started = Date.now();
   let res;
   try {
-    res = await geminiClient().models.generateContent({
-      model: GEMINI_MODELS.vision,
+    res = await withVisionRetry((model) => geminiClient().models.generateContent({
+      model,
       contents: [
         {
           role: "user",
@@ -87,7 +101,7 @@ export async function reviewEdit(original: ImageInput, edited: ImageInput, plan:
         },
       ],
       config: { responseMimeType: "application/json", responseJsonSchema: z.toJSONSchema(ReviewSchema, { target: "draft-7" }), temperature: 0 },
-    });
+    }));
   } catch (err) {
     throw mapGeminiError(err, "review");
   }
@@ -106,15 +120,15 @@ export async function analyzePhoto(image: ImageInput): Promise<{ inventory: Feat
   const started = Date.now();
   let res;
   try {
-    res = await geminiClient().models.generateContent({
-      model: GEMINI_MODELS.vision,
+    res = await withVisionRetry((model) => geminiClient().models.generateContent({
+      model,
       contents: [{ role: "user", parts: [{ inlineData: { mimeType: image.mimeType, data: image.base64 } }, { text: ANALYSIS_PROMPT }] }],
       config: {
         responseMimeType: "application/json",
         responseJsonSchema: z.toJSONSchema(RawInventory, { target: "draft-7" }),
         temperature: 0,
       },
-    });
+    }));
   } catch (err) {
     throw mapGeminiError(err, "analysis");
   }

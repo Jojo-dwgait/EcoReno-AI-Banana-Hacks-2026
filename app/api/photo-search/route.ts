@@ -8,6 +8,7 @@ const DAY = 86_400;
 export async function GET(request: Request) {
   // Read the request before the try block so Next's "render at request time" signal isn't swallowed by errorResponse.
   const params = new URL(request.url).searchParams;
+  if (params.get("status") === "1") return Response.json({ ok: true, configured: Boolean(process.env.UNSPLASH_ACCESS_KEY) });
   try {
     const key = process.env.UNSPLASH_ACCESS_KEY;
     if (!key) throw new AppError("PHOTO_SEARCH_UNAVAILABLE", "Photo search isn't configured on this server yet. Try one of the sample homes.", 503);

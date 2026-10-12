@@ -56,3 +56,28 @@ export function buildEditPrompt(plan: EditPlan): string {
     "Keep ordinary realistic imperfections. Match the original photo's color, grain, and sharpness so the edit blends in. Output the full edited photograph at the same framing.",
   ].join("\n");
 }
+
+/**
+ * Short, explicit form of the same plan for editors with a tight prompt budget (FLUX.1 Kontext: ~512 tokens).
+ * Same rule as the full prompt: concrete instructions only, no numbers, no city names.
+ */
+export function compactEditPrompt(plan: EditPlan): string {
+  const changes = plan.changes
+    .map((c) => {
+      const style = c.styleDescriptors.length ? ` Use ${c.styleDescriptors.slice(0, 3).join(", ")}.` : "";
+      return `${c.instruction}${style} Only change ${c.targetArea.replace(/"/g, "")}.`;
+    })
+    .join(" ");
+  const pavingChanges = plan.preserve.some((p) => p.includes("only its surface changes"));
+  // The photo's own condition notes (from the scene analysis) make "keep the wear" concrete.
+  const condition = plan.preserve.find((p) => p.startsWith("the house's visible condition:"))?.split(":").slice(1).join(":").replace(/"/g, "").trim();
+  const keep = [
+    "the house's shape, roofline, siding, windows and doors",
+    pavingChanges ? "the walkways and the driveway's outline" : "the driveway and walkways exactly as they are, including any cracks, stains and weeds",
+    "existing objects such as lamp posts, planters, mailboxes and utility poles",
+    "the trees, sky, lighting, shadows and season",
+    "the same camera position and framing",
+  ].join("; ");
+  const wear = condition ? ` Keep the existing wear (${condition}).` : " Keep any existing wear and imperfections.";
+  return `Edit this photo of a house. ${changes} Keep ${keep}.${wear} Photorealistic; no new buildings, people, text or cars; don't tidy or renovate anything else.`;
+}

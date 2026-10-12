@@ -4,7 +4,7 @@ import { buildEditPlan, MAX_CHANGES } from "@/lib/editPlan";
 import { AppError, errorResponse } from "@/lib/errors";
 import { FeatureInventorySchema } from "@/lib/featureInventory";
 import { runGeneration, type StageEvent } from "@/lib/generatePipeline";
-import { GeminiImageEditor } from "@/lib/imageEditClient";
+import { getImageEditor } from "@/lib/editorFactory";
 import { decodeUpload } from "@/lib/imageNormalize";
 import { INTERVENTION_BY_ID, type InterventionId } from "@/lib/interventions";
 import { enforceLimit } from "@/lib/rateLimit";
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
         send({ stage: "plan" });
         const { profile } = await getSiteProfile(body.place);
         const plan = buildEditPlan([...new Set(body.selected)], profile, body.inventory, { renterMode: body.renterMode });
-        const result = await runGeneration(new GeminiImageEditor(), { mimeType: "image/jpeg", ...upload }, plan, (e: StageEvent) => send(e));
+        const result = await runGeneration(getImageEditor(), { mimeType: "image/jpeg", ...upload }, plan, (e: StageEvent) => send(e));
         console.log(
           JSON.stringify({ stage: "generate", placeId: body.place.id, selected: body.selected, attempts: result.attempts, verdict: result.verdict, totalMs: Date.now() - started }),
         );

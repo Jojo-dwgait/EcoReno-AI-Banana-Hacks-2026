@@ -19,7 +19,7 @@ const { searchUsPlaces } = await import("../lib/geocode");
 const { recommend } = await import("../lib/recommendationEngine");
 const { buildEditPlan } = await import("../lib/editPlan");
 const { runGeneration } = await import("../lib/generatePipeline");
-const { GeminiImageEditor } = await import("../lib/imageEditClient");
+const { getImageEditor } = await import("../lib/editorFactory");
 const { resultKey } = await import("../lib/samples");
 type Entry = import("../lib/samples").SampleManifestEntry;
 
@@ -56,7 +56,7 @@ for (const city of cities) {
     continue;
   }
   const plan = buildEditPlan(selected, profile, inventory);
-  const result = await runGeneration(new GeminiImageEditor(), input, plan, (e) => console.log(`  ${city}:`, JSON.stringify(e)));
+  const result = await runGeneration(getImageEditor(), input, plan, (e) => console.log(`  ${city}:`, JSON.stringify(e)));
   const name = `${place.id}-${selected.join("_")}`;
   await writeFile(path.join(dir, "results", `${name}.jpg`), Buffer.from(result.image.base64, "base64"));
   await writeFile(

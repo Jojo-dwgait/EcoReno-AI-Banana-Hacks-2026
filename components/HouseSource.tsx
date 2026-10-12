@@ -176,6 +176,18 @@ function SampleGallery({ onSample }: { onSample: Props["onSample"] }) {
 export function HouseSource({ photo, credit, onUpload, onPicked, onSample }: Props) {
   const [tab, setTab] = useState<Tab>("search");
   const [notice, setNotice] = useState<string | null>(null);
+
+  // Open on the sample homes when this deployment has no photo-search key, instead of a search box that can't work.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/photo-search?status=1")
+      .then((r) => r.json())
+      .then((d) => !cancelled && d?.configured === false && setTab((t) => (t === "search" ? "samples" : t)))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   return (
     <div className="space-y-4">
       <div role="tablist" aria-label="Choose a house" className="flex flex-wrap gap-1 border-b border-line">

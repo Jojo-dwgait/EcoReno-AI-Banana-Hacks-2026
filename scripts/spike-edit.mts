@@ -14,9 +14,11 @@ try {
 }
 
 const { geminiClient, GEMINI_MODELS } = await import("../lib/gemini");
-const { GeminiImageEditor } = await import("../lib/imageEditClient");
+const { getImageEditor } = await import("../lib/editorFactory");
 const { normalizeToOriginal } = await import("../lib/imageNormalize");
-const { analyzePhoto } = await import("../lib/visionClient");
+const { analyzePhoto, reviewEdit } = await import("../lib/visionClient");
+const { computeChangeMap } = await import("../lib/changeMap");
+const { buildEditPlan } = await import("../lib/editPlan");
 const { BASE_FORBIDDEN, BASE_PRESERVE, buildEditPrompt } = await import("../lib/renovationPrompt");
 
 type Plan = Parameters<typeof buildEditPrompt>[0];
@@ -68,25 +70,63 @@ await mkdir(outDir, { recursive: true });
 const base = path.basename(photoPath).replace(/\.[^.]+$/, "");
 await writeFile(path.join(outDir, `${base}-original.jpg`), resized.data);
 
-if (!args.includes("--skip-analysis")) {
-  const { inventory, model, ms } = await analyzePhoto(input);
+let targets: { x: number; y: number; w: number; h: number }[] = [];
+type Inventory = Awaited<ReturnType<typeof analyzePhoto>>["inventory"];
+let inventory: Inventory | null = null;
+const analysisFile = path.join(outDir, `${base}-analysis.json`);
+if (args.includes("--skip-analysis")) {
+  inventory = await readFile(analysisFile, "utf8").then((t) => JSON.parse(t) as Inventory).catch(() => null);
+} else {
+  const analyzed = await analyzePhoto(input);
+  inventory = analyzed.inventory;
+  const { model, ms } = analyzed;
   console.log(`\nanalysis (${model}, ${ms} ms): house=${inventory.isResidentialExterior} type=${inventory.propertyType} stories=${inventory.stories} roofFacesCamera=${inventory.roofFacesCamera}`);
   for (const [k, f] of Object.entries(inventory.features)) {
     console.log(`  ${k.padEnd(9)} ${f.visible ? "yes" : "no "} ${f.confidence.toFixed(2)} ${f.box ? `box x${f.box.x.toFixed(2)} y${f.box.y.toFixed(2)} w${f.box.w.toFixed(2)} h${f.box.h.toFixed(2)}` : ""} ${f.note}`);
   }
   console.log("  scene:", JSON.stringify(inventory.scene), "\n  uncertainties:", inventory.uncertainties.join(" | "));
-  await writeFile(path.join(outDir, `${base}-analysis.json`), JSON.stringify(inventory, null, 2));
+  await writeFile(analysisFile, JSON.stringify(inventory, null, 2));
 }
 
-const editor = new GeminiImageEditor();
+// --app=<city>:<id,id>  builds the plan exactly like the app (real site profile + this photo's analysis).
+const appArg = args.find((a) => a.startsWith("--app="))?.split("=")[1];
+if (appArg) {
+  if (!inventory) throw new Error("--app needs a photo analysis (run once without --skip-analysis)");
+  const [city, ids] = appArg.split(":");
+  const { searchUsPlaces } = await import("../lib/geocode");
+  const { getSiteProfile } = await import("../lib/climateService");
+  const { INTERVENTION_BY_ID } = await import("../lib/interventions");
+  const [place] = await searchUsPlaces(city);
+  const { profile } = await getSiteProfile(place);
+  const selected = ids.split(",") as Parameters<typeof buildEditPlan>[0];
+  plans.APP = buildEditPlan(selected, profile, inventory);
+  chosen.splice(0, chosen.length, "APP");
+  targets = selected.map((x) => inventory!.features[INTERVENTION_BY_ID[x].target].box).filter((b): b is NonNullable<typeof b> => b !== null);
+  console.log(`app plan for ${place.label}: ${selected.join(", ")}`);
+}
+
+const editor = getImageEditor();
+console.log(`editor: ${editor.provider}`);
 for (const id of chosen) {
   const plan = plans[id];
   if (!plan) continue;
   try {
-    const result = await editor.edit(input, buildEditPrompt(plan));
+    const prompt = editor.formatPrompt ? editor.formatPrompt(plan) : buildEditPrompt(plan);
+    console.log(`\nplan ${id} prompt (${prompt.split(/\s+/).length} words): ${prompt}`);
+    const result = await editor.edit(input, prompt);
     const norm = await normalizeToOriginal(result.base64, input.width, input.height);
     const file = path.join(outDir, `${base}-plan${id}.jpg`);
     await writeFile(file, Buffer.from(norm.base64, "base64"));
+    if (args.includes("--score")) {
+      const edited = { mimeType: "image/jpeg" as const, base64: norm.base64, width: norm.width, height: norm.height };
+      const { review } = await reviewEdit(input, edited, plan);
+      const px = async (b64: string) => (await sharp(Buffer.from(b64, "base64")).resize(512, Math.round((512 * input.height) / input.width)).ensureAlpha().raw().toBuffer({ resolveWithObject: true }));
+      const [a, b] = await Promise.all([px(input.base64), px(norm.base64)]);
+      const map = computeChangeMap(new Uint8ClampedArray(a.data), new Uint8ClampedArray(b.data), a.info.width, a.info.height, targets);
+      console.log(`  review: changes ${review.perChange.map((c) => `${c.id}=${c.status}`).join(", ")} | kept ${review.perPreserve.filter((x) => x.kept).length}/${review.perPreserve.length} | unrequested: ${review.unrequestedChanges.join("; ") || "none"}`);
+      console.log(`  drifted: ${review.perPreserve.filter((x) => !x.kept).map((x) => x.item.slice(0, 60)).join(" | ") || "none"}`);
+      console.log(`  pixels: ${(map.changedFraction * 100).toFixed(1)}% changed overall, ${map.protectedDrift === null ? "n/a" : (map.protectedDrift * 100).toFixed(1) + "%"} of the area outside targets`);
+    }
     console.log(`\nplan ${id}: ${result.ms} ms · ${result.model} · model output ${norm.source.width}×${norm.source.height} (${result.mimeType}) · aspect mismatch ${(norm.aspectMismatch * 100).toFixed(1)}% → ${file}${result.modelNote ? `\n  note: ${result.modelNote.slice(0, 200)}` : ""}`);
   } catch (err) {
     console.log(`\nplan ${id}: FAILED ${(err as Error).message}`);

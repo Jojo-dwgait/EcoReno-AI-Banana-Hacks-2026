@@ -11,6 +11,8 @@ export interface ImageEditor {
   readonly provider: string;
   readonly model: string;
   edit(input: ImageInput, prompt: string): Promise<EditResult>;
+  /** Editors with a tight prompt budget render the plan their own way; default is the full CLAUDE.md template. */
+  formatPrompt?(plan: import("./renovationPrompt").EditPlan): string;
 }
 
 const ASPECTS = ["1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", "21:9"] as const;

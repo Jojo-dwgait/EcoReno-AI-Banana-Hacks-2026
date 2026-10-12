@@ -46,7 +46,7 @@ export async function runGeneration(
   let currentPlan = plan;
 
   for (let attempt = 1; attempt <= 2; attempt++) {
-    const prompt = buildEditPrompt(currentPlan);
+    const prompt = editor.formatPrompt ? editor.formatPrompt(currentPlan) : buildEditPrompt(currentPlan);
     onStage({ stage: "edit", attempt });
     const edit = await editor.edit(original, prompt);
     const norm = await normalizeToOriginal(edit.base64, original.width, original.height);
